@@ -943,6 +943,7 @@ function openMessage(i, fromNotif) {
   msgMms.hidden = !m.mms;          // pokaż załącznik MMS tylko dla MMS
   openMessageSender = m.sender;
   if (m.unread) { m.unread = false; updateBadges(); renderInbox(); }
+  removeMsgNotif(m);   // odczyt (z listy lub powiadomienia) zdejmuje ją z powiadomień
   showScreen('message');
 }
 msgCallBtn.addEventListener('click', () => {
@@ -1047,12 +1048,12 @@ function buildTopNotifCard() {
         '<button class="notif-red" data-act="dismiss">Przeczytane</button>' +
       '</div>';
     card.querySelector('[data-act="read"]').addEventListener('click', () => {
-      notifQueue.pop();
+      // openMessage sam zdejmie tę wiadomość z powiadomień (removeMsgNotif).
       openMessage(messages.indexOf(m), true);
     });
     card.querySelector('[data-act="dismiss"]').addEventListener('click', () => {
       m.unread = false; updateBadges(); renderInbox();
-      notifQueue.pop(); renderNotifStack(); buzz(15);
+      removeMsgNotif(m); buzz(15);
     });
   } else {
     const c = n.ref;
@@ -1121,6 +1122,13 @@ function renderTopNotif() { renderNotifStack(); }
 
 function pushMsgNotif(m) { notifQueue.push({ type: 'msg', ref: m }); renderNotifStack(); buzz([20, 40, 20]); soundMessage(); }
 function pushCallNotif(c) { notifQueue.push({ type: 'call', ref: c }); renderNotifStack(); buzz([20, 40, 20]); }
+// Usuń z kolejki powiadomień wpis wskazujący na daną wiadomość (po referencji,
+// niezależnie od pozycji). Dzięki temu odczyt wiadomości — czy to z panelu
+// powiadomień, czy z listy Wiadomości — zawsze ją z powiadomień zdejmuje.
+function removeMsgNotif(m) {
+  const i = notifQueue.findIndex((n) => n.type === 'msg' && n.ref === m);
+  if (i !== -1) { notifQueue.splice(i, 1); renderNotifStack(); }
+}
 
 // Podpowiedź kontaktu przy wpisywaniu numeru.
 function updateNumberHint(value) {
