@@ -184,6 +184,8 @@ jak zwine klaw w kontakty, potem klikne powiadomienia i potem wroce do kontakty,
 
 w light theme: Lagodne ramki zamiast ostrych ramek przyciskow (łagodne jak odczytane wiadomosci, sprawdzone polaczenia) - na kafelkach, na klawiaturze, kontakty w kontaktach a wpisz numer/ wpisz aby wyszukac calkiem bez ramki, separator statusu tez telikatny. w dark theme tylko wpisz numer/wpisz aby wyszukac bez ramek a reszta bez zmian bo juz i tak ma lagodne
 
+bug: wpisanie spacja w trakcie jeszcze cyklu, gdy jeszcze wpisana spacja podswietlona, to ona ma za maja szerokosci, jaby jej nie bylo w srodku, a juz przy pisaniu nastepnej literki ma szerokosc. to cos w trakcie, przy podsiwetleniu i bialym znaku?
+
 ---
 
 
@@ -200,16 +202,51 @@ Moze szare albo mniej intensywne oddzwon odrzuc w powiadomieniach zeby mniej prz
 
 reszta:
 
-commit
 
-
-commit
+kontakty ma buga, ze jak dojade do konca listy to nadal sie przewija ale wolniej w pusta przestrzen. napraw
 
 Suwak jak za malo miejsca na liscie polaczen, polaczen z ta osoba, wiadomosci, czytania wiadomosci - taki cienki custom w powietrzu nie zajmujacy miejsca  - taka jak w kontakty
 
-ponownie zrob to czego nie zrobione: doc:
 
-ponownie screeny do reademe i podmienic
+
+commit
+
+doc dokonczyc:
+zrob screeny na nowo pod readme, ale tez zrob jak nie ma zadnych powiadomien
+
+usun dział "Uruchomienie" z readme
+
+Spis widoków (przypis do ai: to ustala kolejnosc w szczegolowych opisach widokow):
+Powiadomienia "Główny" (kafle + powiadomienia + klawiatura)
+Kontakty
+Wiadomości
+Czytanie wiadomości
+Połączenia
+Ostatnie połączenia z tą osobą
+Połączenie przychodzące
+Rozmowa (aktywne połączenie)
+Wideorozmowa (aktywne połączenie)
+Blokada ekranu
+
+w Elementy (nie żadne elementy wspolne przypis do ai)
+Pasek statusu
+Powiadomienie
+Potwierdzenie połączenia (popup)
+
+nie "Co zawiera każdy widok" tylko "Co zawierają widoki?"
+
+
+nie "Decyzje projektowe (jak i dlaczego coś działa)" tylko "Jaj działa?"
+
+nie "Funkcje (prawdziwe, działają same w sobie)" tylko dodac je do "Jak działa?"
+
+nie "Symulacje zdarzeń (sztuczne wywołanie tego, co normalnie przychodzi z zewnątrz)" tylko "Symulacje"
+
+nie "Tu chodzi wyłącznie o ręczne wywołanie zdarzeń, których w makiecie nikt z zewnątrz nie wyśle." tlyko "Sztuczne wywołanie tego, co normalnie przychodzi z zewnątrz."
+
+"Zakończone rozmowy trafiają na listę „Połączenia"" to opisz działania funkcji a nie symulacji
+
+usuń nagłówek "Szczegóły symulacji:" i dolacz punkty do "Symulacje"
 
 commit
 

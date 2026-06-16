@@ -115,7 +115,7 @@ html, body {
   height: 168px;
   padding: 14px 30px 4px;        /* minimalny odstęp pod godziną/datą */
   background: var(--surface);
-  border-bottom: 3px solid var(--ink);
+  border-bottom: 3px solid var(--line);   /* delikatny separator (nie ostry) */
   display: flex;
   flex-direction: column;
 }
@@ -212,7 +212,7 @@ main {
   gap: 14px;
   padding: 18px 12px;   /* odstęp ikony/tekstu od krawędzi także przy małej wysokości */
   position: relative;
-  border: 3px solid var(--ink);
+  border: 3px solid var(--line);   /* łagodna ramka (jak przeczytane/sprawdzone) */
   background: var(--surface);
   box-shadow: 0 2px 6px rgba(0,0,0,.10);
   transition: transform .04s, box-shadow .04s;
@@ -341,7 +341,7 @@ main {
 .num-field {
   height: 96px;
   background: var(--surface);
-  border: 3px solid var(--ink);
+  border: none;                /* pole "Wpisz numer"/"Wpisz, aby wyszukać" — bez ramki */
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -399,7 +399,7 @@ main {
 .key {
   height: 112px;
   background: var(--surface);
-  border: 3px solid var(--ink);
+  border: 3px solid var(--line);   /* łagodna ramka */
   border-radius: 18px;
   box-shadow: 0 2px 6px rgba(0,0,0,.10);
   position: relative;
@@ -505,7 +505,7 @@ main {
   flex: none;
   height: 88px;
   background: var(--surface);
-  border-bottom: 3px solid var(--ink);
+  border-bottom: 3px solid var(--line);   /* delikatna kreska pod nazwą widoku */
   display: flex; align-items: center; justify-content: center;
   font-size: 36px; font-weight: 800; color: var(--ink);
 }
@@ -522,7 +522,7 @@ main {
   flex: none;
   min-height: 128px;
   background: var(--surface);
-  border: 3px solid var(--ink);
+  border: 3px solid var(--line);   /* łagodna ramka */
   border-radius: 24px;
   display: flex; align-items: center; padding: 18px 20px;
   text-align: left;
@@ -1022,9 +1022,9 @@ html.dark, html.dark body { background: #000; }
 html.dark .device { background: var(--bg); }
 /* W trybie ciemnym obrysy kafli/klawiszy/przycisków/pól NIE białe — miękki szary,
    inaczej kontrast jest zbyt ostry i brzydki. */
+/* (.num-field celowo BEZ ramki w obu motywach — pominięte tutaj) */
 html.dark .app-tile,
 html.dark .key,
-html.dark .num-field,
 html.dark .ctrl-btn,
 html.dark .contact-card,
 html.dark .call-card,
