@@ -307,6 +307,14 @@ main {
   display: flex; align-items: center; justify-content: center; gap: 10px;
   transition: transform .04s, box-shadow .04s, background .04s;
 }
+/* Mały badge z liczbą na przycisku CZYTAJ/ODDZWOŃ (gdy >1 zdarzenie z numeru). */
+.act-badge {
+  min-width: 40px; height: 40px; padding: 0 8px;
+  border-radius: 20px;
+  background: #FFF; color: var(--ink);
+  font-size: 26px; font-weight: 800;
+  display: inline-flex; align-items: center; justify-content: center;
+}
 /* Karta-podpowiedź dopasowania numeru do kontaktu. BEZ własnego gap — używa
    tego samego justify-content:space-between co karty msg/call, by elementy
    (awatar/nazwa/numer/przyciski) były na IDENTYCZNEJ wysokości. */

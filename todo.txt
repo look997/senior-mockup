@@ -190,13 +190,18 @@ kontakty ma buga, ze jak dojade do konca listy to nadal sie przewija ale wolniej
 
 Suwak jak za malo miejsca na liscie: polaczen, polaczen z tym numerem, wiadomosci, czytania wiadomosci - taki cienki custom w powietrzu nie zajmujacy miejsca  - taka jak w kontakty
 
+łączenie wielu wiadomosci w jedno powiadomienie, wiele dzwonien nieodebranych z tego samego numeru w jeden - zasady zrozumiale, ze w liczniku powiadomien liczy sie najnowsze polaczenie? i ze oddzwon/odrzuc oznacza je wszystkie z danego numeru jako sprawdzone. widomosci też po czytaj/przeczytalem sie oznaczaja wszystkie z danego numeru jako przeczytane
+
+o wiem, na przycisku "Czytaj" niech będzie liczba wiadomosci z tego numeru, o ile wiecej niz jeden
+
+wszystkie wiadomosci od jednego numeru musza sie wyswietlac w widoku wiadomosci i czytania wiadomosci jako jedna konwersacja, to założenie
+
+przycisk pokaz klaw dialer w trakcie trwajacej rozmowy. zielone Klawiatura ze strzałką w górę obok (z lewej strony) czerwonego klawisza rozłącz
+
 
 ---
 
-
 moze inspo dotychczasowymi aplikacjami zeby ulepszyc wyglad
-
-Pod themesy wystawic zmienne css z kolorami, ramkami, ikonkami i moze margin padding
 
 moze powinny byc polaczenia po prawej a wiadomosci po prawej, nie wiem, raczej nie ale kto wie? co wygodniej?
 
@@ -205,12 +210,20 @@ chyba nie powinny tak latwo krawedzie po bokach sie klikac? bo ja przez przypade
 Moze szare albo mniej intensywne oddzwon odrzuc w powiadomieniach zeby mniej przytlaczac? ale najpierw te ramki na cienie, moze to zmniejszy przytoczenie wystarczajaco
 
 
-reszta:
+zaawansowane:
+
+"numer nie istnieje", numer nie odpowiada i zestaw standardowych komunikatow bledow, typu zly numer, zerwane polaczenie, brak czegos tam. ale to wiesz, zrob reserach z standardowym zestawem takich rzeczy idz. nie wiem jak to potem symulowac ale tylko odnotowuję
+
+Zawies rozmowe dwie rozmowy na raz - dodatkowy widok?
+
+patrzenie na ekran glowny w trakcie rozmowy - wtedy rozmowa ktora jest w trakcie w miejscu powiedomienia. po co? moze zeby wtedy wejsc w wiadomosci albo inny widok? w trakcie i cos sprawdzic
+
+Pod themesy wystawic zmienne css z kolorami, ramkami, ikonkami i moze margin padding
+
+nowy projekt, tym razem natywna apka ktora robi to wszystko (znaczy ui tylko jeden do jeden), a nastepny krok podstawic tam faktyczne dane i funkcje. laucher (lekki) monolit, ma w sobie uprawnienia do: powiadomienia, wiadomosci, polaczenia, kontakty
 
 
-commit
-
-doc dokonczyc:
+readme doc dokonczyc:
 zrob screeny na nowo pod readme, ale tez zrob jak nie ma zadnych powiadomien
 
 usun dział "Uruchomienie" z readme
@@ -247,18 +260,8 @@ nie "Tu chodzi wyłącznie o ręczne wywołanie zdarzeń, których w makiecie ni
 
 usuń nagłówek "Szczegóły symulacji:" i dolacz punkty do "Symulacje"
 
+sprawdz funkcje apki ze screenow i kodu i commitow i rozmowy i wywnioskuj i zapytaj czy dopisac cos czego brakuje
+
 commit
 
 pull
-
-zaawansowane:
-
-"numer nie istnieje", numer nie odpowiada i zestaw standardowych komunikatow bledow, typu zly numer, zerwane polaczenie, brak czegos tam. ale to wiesz, zrob reserach z standardowym zestawem takich rzeczy idz. nie wiem jak to potem symulowac ale tylko odnotowuję
-
-łączenie wielu wiadomosci w jedno powiadomienie, wielo dzwonien nieodebranych z tego samego numeru w jeden
-
-Zawies rozmowe dwie rozmowy na raz - dodatkowy widok?
-
-patrzenie na ekran glowny w trakcie rozmowy - wtedy rozmowa ktora jest w trakcie w miejscu powiedomienia
-
-nowy projekt, tym razem natywna apka ktora robi to wszystko (znaczy ui tylko jeden do jeden), a nastepny krok podstawic tam faktyczne dane i funkcje. laucher (lekki) monolit, ma w sobie uprawnienia do: powiadomienia, wiadomosci, polaczenia, kontakty

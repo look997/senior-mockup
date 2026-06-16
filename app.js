@@ -1010,27 +1010,42 @@ document.querySelector('[data-role="to-audio"]').addEventListener('click', goAud
 
 // ---------------- RENDER: WIADOMOŚCI (grupy: nieprzeczytane | przeczytane) ----------------
 function msgCardHTML(m) {
+  // Znacznik nieprzeczytanej: numer ma JAKĄKOLWIEK nieprzeczytaną wiadomość.
+  const hasUnread = unreadCountFrom(m.phone) > 0;
   return '<span class="avatar ' + (m.color || 'av-gray') + '">' + (m.initials || '?') + '</span>' +
     '<div class="msg-body">' +
       '<div class="msg-time">' + m.time + '</div>' +
       '<div class="msg-sender">' + m.sender + '</div>' +
       '<div class="msg-preview">' + (m.mms ? '<span class="msg-mms-tag">[MMS]</span>' : '') + m.preview + '</div>' +
     '</div>' +
-    (m.unread ? '<div class="card-corner"></div>' : '');
+    (hasUnread ? '<div class="card-corner"></div>' : '');
 }
 function renderInbox() {
   const wrap = document.getElementById('inbox-list');
   wrap.innerHTML = '';
-  const unread = messages.filter((m) => m.unread);
-  const read = messages.filter((m) => !m.unread);
-
-  unread.forEach((m) => {
-    const card = document.createElement('button');
-    card.className = 'msg-card unread';
-    card.innerHTML = msgCardHTML(m);
-    card.addEventListener('click', () => openMessage(messages.indexOf(m)));
-    wrap.appendChild(card);
+  // JEDEN wpis per NUMER (konwersacja): reprezentantem jest najnowsza wiadomość
+  // numeru (pierwsza w messages, bo unshift). Numer "nieprzeczytany", jeśli ma
+  // jakąkolwiek nieprzeczytaną wiadomość.
+  const seen = new Set();
+  const reps = [];
+  messages.forEach((m) => {
+    const key = digitsOnly(m.phone);
+    if (seen.has(key)) return;
+    seen.add(key);
+    reps.push(m);   // pierwszy napotkany = najnowszy z tego numeru
   });
+  const unread = reps.filter((m) => unreadCountFrom(m.phone) > 0);
+  const read = reps.filter((m) => unreadCountFrom(m.phone) === 0);
+
+  const addCard = (m, cls) => {
+    const card = document.createElement('button');
+    card.className = 'msg-card ' + cls;
+    card.innerHTML = msgCardHTML(m);
+    card.addEventListener('click', () => openMessage(m));   // otwiera CAŁĄ konwersację numeru
+    wrap.appendChild(card);
+  };
+
+  unread.forEach((m) => addCard(m, 'unread'));
 
   // Etykieta "Przeczytane" pozostaje ZAWSZE, gdy są jakieś przeczytane —
   // także gdy nie ma żadnej nieprzeczytanej.
@@ -1042,13 +1057,7 @@ function renderInbox() {
     wrap.appendChild(div);
   }
 
-  read.forEach((m) => {
-    const card = document.createElement('button');
-    card.className = 'msg-card read';
-    card.innerHTML = msgCardHTML(m);
-    card.addEventListener('click', () => openMessage(messages.indexOf(m)));
-    wrap.appendChild(card);
-  });
+  read.forEach((m) => addCard(m, 'read'));
   refreshScrollbarById('inbox-list');
 }
 
@@ -1064,32 +1073,59 @@ const msgReadBtn = document.getElementById('message-read');
 let openMessageSender = null;
 let openedFromNotif = false;   // czy weszliśmy w wiadomość z powiadomienia
 
+// Cała KONWERSACJA z danym numerem — wszystkie wiadomości tego numeru jako wątek
+// dymków {from, text, time}, chronologicznie (najstarsze pierwsze). messages[] ma
+// najnowsze na początku (unshift), więc odwracamy. Jeśli wpis ma gotowy `thread`
+// (np. Anna), używamy go jako bazy i dołączamy ewentualne NOWSZE pojedyncze wpisy
+// tego numeru (z symulacji), które nie są w thread.
+function conversationFor(phone) {
+  const key = digitsOnly(phone || '');
+  const ofNum = messages.filter((m) => digitsOnly(m.phone) === key);   // najnowsze pierwsze
+  const withThread = ofNum.find((m) => m.thread && m.thread.length);
+  if (withThread) {
+    const conv = withThread.thread.slice();   // gotowa rozmowa (rosnąco)
+    // Dołącz pojedyncze wpisy tego numeru NIEbędące nośnikiem thread (np. nowe z symulacji),
+    // jako dymki 'in', w kolejności rosnącej (odwrócone, bo messages ma najnowsze pierwsze).
+    ofNum.filter((m) => m !== withThread).reverse().forEach((m) => {
+      conv.push({ from: m.from || 'in', text: m.body || m.preview, time: m.time });
+    });
+    return conv;
+  }
+  // Brak thread: złóż wątek z pojedynczych wpisów (rosnąco).
+  return ofNum.slice().reverse().map((m) => ({ from: m.from || 'in', text: m.body || m.preview, time: m.time }));
+}
+
 // Pojedynczy dymek konwersacji. esc() + \n → <br>, by zachować akapity długiego tekstu.
 function bubbleHTML(from, text, time) {
   const body = esc(text).replace(/\n/g, '<br>');
   const t = time ? '<span class="bubble-time">' + esc(time) + '</span>' : '';
   return '<div class="bubble ' + (from === 'out' ? 'out' : 'in') + '">' + body + t + '</div>';
 }
-function openMessage(i, fromNotif) {
-  const m = messages[i];
+// Otwiera CAŁĄ konwersację z numeru. Przyjmuje wpis wiadomości (obiekt) — albo,
+// dla zgodności, indeks do messages[]. Wyświetla wszystkie wiadomości tego numeru
+// jako wątek dymków, niezależnie którą kartę/wiadomość kliknięto.
+function openMessage(mOrIndex, fromNotif) {
+  const m = (typeof mOrIndex === 'number') ? messages[mOrIndex] : mOrIndex;
+  if (!m) return;
   openedFromNotif = !!fromNotif;
   msgAvatar.className = 'avatar ' + (m.color || 'av-blue');
   msgAvatar.textContent = m.initials || '?';
   msgSender.textContent = m.sender;
   msgPhone.textContent = formatPhone(m.phone) || '';
   msgTime.textContent = m.time;
-  // Cała konwersacja jako dymki, jeśli jest wątek; inaczej pojedynczy dymek (treść).
-  if (m.thread && m.thread.length) {
-    msgText.innerHTML = m.thread.map((b) => bubbleHTML(b.from, b.text, b.time)).join('');
-  } else {
-    msgText.innerHTML = bubbleHTML('in', m.body || m.preview, null);
-  }
+  // Cały wątek numeru (wszystkie wiadomości tej osoby) jako dymki.
+  const conv = conversationFor(m.phone);
+  msgText.innerHTML = conv.map((b) => bubbleHTML(b.from, b.text, b.time)).join('');
   msgMms.hidden = !m.mms;          // pokaż załącznik MMS tylko dla MMS
   openMessageSender = m.sender;
-  if (m.unread) { m.unread = false; updateBadges(); renderInbox(); }
-  removeMsgNotif(m);   // odczyt (z listy lub powiadomienia) zdejmuje ją z powiadomień
+  // Odczyt konwersacji oznacza WSZYSTKIE wiadomości z numeru jako przeczytane
+  // i zdejmuje całą grupę z powiadomień.
+  markAllReadFrom(m.phone);
+  updateBadges(); renderInbox();
+  removeMsgNotifByPhone(m.phone);
+  // Wątek: pokaż NAJNOWSZE (na dole), jak w komunikatorze.
   const mb = document.getElementById('message-body');
-  if (mb) mb.scrollTop = 0;        // nowa wiadomość — od góry
+  if (mb) requestAnimationFrame(() => { mb.scrollTop = mb.scrollHeight; });
   showScreen('message');
 }
 msgCallBtn.addEventListener('click', () => {
@@ -1157,12 +1193,14 @@ function clickMute() {
 
 // ---------------- OZNACZENIA W ROGU KAFLI + KROPKA POWIADOMIEŃ ----------------
 function updateBadges() {
-  const unread = messages.filter((m) => m.unread).length;
+  // Znaczniki na kaflach liczą UNIKALNE NUMERY (osoby), nie sztuki — spójnie
+  // z grupowaniem powiadomień (3 wiadomości od Jana = 1).
+  const unread = new Set(messages.filter((m) => m.unread).map((m) => digitsOnly(m.phone))).size;
   const msgCorner = document.getElementById('msg-corner');
   if (unread > 0) { msgCorner.textContent = String(unread); msgCorner.hidden = false; }
   else { msgCorner.hidden = true; }
 
-  const missed = calls.filter((c) => c.dir === 'missed' && !c.handled).length;
+  const missed = new Set(calls.filter((c) => c.dir === 'missed' && !c.handled).map((c) => digitsOnly(c.phone))).size;
   const callsCorner = document.getElementById('calls-corner');
   if (missed > 0) { callsCorner.textContent = String(missed); callsCorner.hidden = false; }
   else { callsCorner.hidden = true; }
@@ -1183,43 +1221,47 @@ function buildTopNotifCard() {
   const card = document.createElement('div');
   card.className = 'notif-card ' + (n.type === 'msg' ? 'msg' : 'call');
   const more = notifQueue.length > 1 ? '<span class="notif-count">+' + (notifQueue.length - 1) + ' więcej</span>' : '';
+  // Mały badge z liczbą na przycisku akcji, gdy z numeru jest >1 zdarzenie.
+  const actBadge = (cnt) => cnt > 1 ? '<span class="act-badge">' + cnt + '</span>' : '';
   if (n.type === 'msg') {
     const m = n.ref;
+    const cnt = unreadCountFrom(m.phone);   // ile nieprzeczytanych z tego numeru
     card.innerHTML =
       '<div class="notif-head"><span class="notif-kind">Wiadomość</span>' +
         '<span class="notif-time">' + m.time + '</span>' + more + '</div>' +
       '<div class="notif-from"><span class="avatar ' + (m.color || 'av-gray') + '">' + (m.initials || '?') + '</span>' + m.sender + '</div>' +
       '<div class="notif-preview">' + (m.mms ? '[MMS] ' : '') + m.preview + '</div>' +
       '<div class="notif-actions">' +
-        '<button class="notif-green" data-act="read">CZYTAJ</button>' +
+        '<button class="notif-green" data-act="read">CZYTAJ' + actBadge(cnt) + '</button>' +
         '<button class="notif-red" data-act="dismiss">Przeczytane</button>' +
       '</div>';
     card.querySelector('[data-act="read"]').addEventListener('click', () => {
-      // openMessage sam zdejmie tę wiadomość z powiadomień (removeMsgNotif).
+      // openMessage oznaczy całą grupę z numeru jako przeczytaną i ją zdejmie.
       openMessage(messages.indexOf(m), true);
     });
     card.querySelector('[data-act="dismiss"]').addEventListener('click', () => {
-      m.unread = false; updateBadges(); renderInbox();
-      removeMsgNotif(m); buzz(15);
+      markAllReadFrom(m.phone); updateBadges(); renderInbox();   // CAŁA grupa przeczytana
+      removeMsgNotifByPhone(m.phone); buzz(15);
     });
   } else {
     const c = n.ref;
+    const cnt = missedCountFrom(c.phone);   // ile nieodebranych z tego numeru
     card.innerHTML =
       '<div class="notif-head"><span class="notif-kind">' + (c.video ? 'Nieodebrana wideorozmowa' : 'Nieodebrane połączenie') + '</span>' + more + '</div>' +
       '<div class="notif-from">' + avatarHTML(c.name) + c.name + '</div>' +
       '<div class="notif-preview">' + formatPhone(c.phone) + ' · ' + c.time + '</div>' +
       '<div class="notif-actions">' +
-        '<button class="notif-green" data-act="callback">ODDZWOŃ</button>' +
+        '<button class="notif-green" data-act="callback">ODDZWOŃ' + actBadge(cnt) + '</button>' +
         '<button class="notif-red" data-act="reject">Odrzuć</button>' +
       '</div>';
     card.querySelector('[data-act="callback"]').addEventListener('click', () => {
-      c.handled = true; updateBadges(); renderCalls();
-      notifQueue.pop(); renderNotifStack();
+      handleAllMissedFrom(c.phone); updateBadges(); renderCalls();   // CAŁA grupa sprawdzona
+      removeCallNotif(c.phone); renderNotifStack();
       openConfirm(c.name, c.phone, null, { from: 'notif' });   // powrót: "Powiadomienia" (HOME)
     });
     card.querySelector('[data-act="reject"]').addEventListener('click', () => {
-      c.handled = true; updateBadges(); renderCalls();
-      notifQueue.pop(); renderNotifStack(); buzz(15);
+      handleAllMissedFrom(c.phone); updateBadges(); renderCalls();   // CAŁA grupa sprawdzona
+      removeCallNotif(c.phone); renderNotifStack(); buzz(15);
     });
   }
   return card;
@@ -1287,14 +1329,50 @@ function renderNotifStack() {
 }
 function renderTopNotif() { renderNotifStack(); }
 
-function pushMsgNotif(m) { notifQueue.push({ type: 'msg', ref: m }); renderNotifStack(); buzz([20, 40, 20]); soundMessage(); }
-function pushCallNotif(c) { notifQueue.push({ type: 'call', ref: c }); renderNotifStack(); buzz([20, 40, 20]); }
-// Usuń z kolejki powiadomień wpis wskazujący na daną wiadomość (po referencji,
-// niezależnie od pozycji). Dzięki temu odczyt wiadomości — czy to z panelu
-// powiadomień, czy z listy Wiadomości — zawsze ją z powiadomień zdejmuje.
-function removeMsgNotif(m) {
-  const i = notifQueue.findIndex((n) => n.type === 'msg' && n.ref === m);
+// Klucz grupujący powiadomienia — numer telefonu (same cyfry).
+function notifKey(ref) { return digitsOnly(ref.phone || ''); }
+// Dodaje powiadomienie GRUPUJĄC po numerze: jeśli jest już wpis tego typu z tym
+// samym numerem, podmienia jego ref na nowszy i przesuwa na wierzch (najnowszy =
+// widoczny). Inaczej dokłada nowy. Dzięki temu wiele zdarzeń z jednego numeru =
+// JEDNA karta.
+function pushNotif(type, ref) {
+  const key = notifKey(ref);
+  const i = notifQueue.findIndex((n) => n.type === type && notifKey(n.ref) === key);
+  if (i !== -1) notifQueue.splice(i, 1);   // usuń stary wpis tego numeru
+  notifQueue.push({ type, ref });          // najnowszy na wierzch
+  renderNotifStack();
+}
+function pushMsgNotif(m) { pushNotif('msg', m); buzz([20, 40, 20]); soundMessage(); }
+function pushCallNotif(c) { pushNotif('call', c); buzz([20, 40, 20]); }
+// Usuń z kolejki CAŁĄ grupę (wpis) danego typu o danym numerze.
+function removeNotifByPhone(type, phone) {
+  const key = digitsOnly(phone || '');
+  const i = notifQueue.findIndex((n) => n.type === type && notifKey(n.ref) === key);
   if (i !== -1) { notifQueue.splice(i, 1); renderNotifStack(); }
+}
+function removeMsgNotifByPhone(phone) { removeNotifByPhone('msg', phone); }
+function removeCallNotif(phone) { removeNotifByPhone('call', phone); }
+// Zgodność: removeMsgNotif(m) — zdejmuje grupę wiadomości z numeru m.
+function removeMsgNotif(m) { removeMsgNotifByPhone(m.phone); }
+
+// Oznacz WSZYSTKIE wiadomości z danego numeru jako przeczytane.
+function markAllReadFrom(phone) {
+  const key = digitsOnly(phone || '');
+  messages.forEach((m) => { if (digitsOnly(m.phone) === key) m.unread = false; });
+}
+// Oznacz WSZYSTKIE nieodebrane z danego numeru jako obsłużone (sprawdzone).
+function handleAllMissedFrom(phone) {
+  const key = digitsOnly(phone || '');
+  calls.forEach((c) => { if (c.dir === 'missed' && digitsOnly(c.phone) === key) c.handled = true; });
+}
+// Ile NIEPRZECZYTANYCH wiadomości z numeru / ile NIEODEBRANYCH nieobsłużonych z numeru.
+function unreadCountFrom(phone) {
+  const key = digitsOnly(phone || '');
+  return messages.filter((m) => m.unread && digitsOnly(m.phone) === key).length;
+}
+function missedCountFrom(phone) {
+  const key = digitsOnly(phone || '');
+  return calls.filter((c) => c.dir === 'missed' && !c.handled && digitsOnly(c.phone) === key).length;
 }
 
 // Podpowiedź kontaktu przy wpisywaniu numeru.
@@ -1509,9 +1587,11 @@ updateBadges();
 setupScrollbars();
 
 // Na starcie wrzuć istniejące nieodebrane/nieprzeczytane jako popupy do odhaczenia,
-// żeby od razu było widać panel powiadomień (najnowszy na wierzchu).
-calls.filter((c) => c.dir === 'missed' && !c.handled).forEach((c) => notifQueue.push({ type: 'call', ref: c }));
-messages.filter((m) => m.unread).forEach((m) => notifQueue.push({ type: 'msg', ref: m }));
+// żeby od razu było widać panel powiadomień (najnowszy na wierzchu). pushNotif
+// GRUPUJE po numerze — iterujemy od najstarszych (reverse), by najnowszy z numeru
+// wylądował na wierzchu kolejki.
+calls.filter((c) => c.dir === 'missed' && !c.handled).reverse().forEach((c) => pushNotif('call', c));
+messages.filter((m) => m.unread).reverse().forEach((m) => pushNotif('msg', m));
 renderTopNotif();
 
 // ---------------- SERVICE WORKER ----------------

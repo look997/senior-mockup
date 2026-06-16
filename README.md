@@ -90,14 +90,15 @@ Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 
 ### Wiadomości
 - Tytuł „Wiadomości" (bez cofania).
-- Lista kart: awatar, nadawca, podgląd, data i godzina (np. „16 cze, 14:05").
+- **Jeden wpis = jedna konwersacja (numer).** Wszystkie wiadomości od tego samego numeru to jedna karta — podgląd pokazuje najnowszą wiadomość, znacznik nieprzeczytanej zapala się, gdy w rozmowie jest cokolwiek nieprzeczytanego.
+- Karta: awatar, nadawca, podgląd najnowszej, data i godzina (np. „16 cze, 14:05").
 - **Nieprzeczytane na górze** (niebieski obrys + znacznik), pod nimi etykieta „Przeczytane" i reszta.
 - MMS oznaczony etykietą „[MMS]" (niebieska gdy nieprzeczytane, szara po przeczytaniu).
 - Czerwony przycisk **Powiadomienia** na dole.
 
 ### Czytanie wiadomości
 - Awatar, nazwa nadawcy, jego numer, data i godzina.
-- **Cała konwersacja w dymkach** — wiadomości **przychodzące** z lewej (szare) i **wysłane** przez użytkownika z prawej (zielone), każdy dymek z godziną. Długie rozmowy i długie pojedyncze wiadomości się przewijają.
+- **Cała konwersacja z numeru** — wszystkie wiadomości od tej osoby jako wątek dymków: **przychodzące** z lewej (szare) i **wysłane** przez użytkownika z prawej (zielone), każdy z godziną. Najnowsze na dole (jak w komunikatorze). Otwarcie którejkolwiek wiadomości z numeru pokazuje pełny wątek.
 - Dla MMS — kafelek ze zdjęciem.
 - Przyciski: zielony **Zadzwoń** do nadawcy, czerwony **Przeczytane**.
 
@@ -153,6 +154,13 @@ Te funkcje działają realnie w makiecie (część efektu fizycznego — jak zap
 - W danym momencie widać jedno powiadomienie; nie znika samo, dopiero reakcja pokazuje następne.
 - Wejście w wiadomość przez „CZYTAJ" i naciśnięcie „Przeczytane" w pełnym widoku wraca **do następnego powiadomienia**, nie do listy.
 - Przeczytanie wiadomości — z panelu powiadomień albo z listy Wiadomości — zawsze zdejmuje ją z powiadomień.
+
+### Grupowanie powiadomień po numerze
+- **Wiele zdarzeń z jednego numeru = jedno powiadomienie.** Jeśli ta sama osoba napisze kilka razy lub zadzwoni kilka razy, w panelu jest **jedna** karta (pokazuje najnowsze zdarzenie), nie kilka osobnych.
+- **Liczba na przycisku akcji** pokazuje, ilu zdarzeń dotyczy grupa (gdy więcej niż jedno): „CZYTAJ ③" = 3 nieprzeczytane wiadomości z tego numeru, „ODDZWOŃ ③" = 3 nieodebrane połączenia z tego numeru.
+- **Jedna reakcja załatwia całą grupę.** „CZYTAJ"/„Przeczytane" oznacza **wszystkie** wiadomości z danego numeru jako przeczytane i zdejmuje grupę. „ODDZWOŃ"/„Odrzuć" oznacza **wszystkie** nieodebrane z tego numeru jako sprawdzone. Tak samo przeczytanie z listy Wiadomości oznacza całą grupę z numeru.
+- **Licznik „+N więcej"** i **znaczniki na kaflach** liczą **osoby/numery**, nie pojedyncze sztuki (3 nieodebrane od Jana liczą się jako 1).
+- **Lista „Połączenia"** to historia — pokazuje pojedyncze zdarzenia osobno (jak w zwykłym telefonie); grupowanie dotyczy tylko panelu powiadomień i znaczników.
 
 ### Podpowiedź dopasowania numeru a powiadomienia
 - Gdy wpisywany numer pasuje do **dokładnie jednego** kontaktu, w obszarze powiadomień pojawia się „Dopasowano do numeru" — **zamiast** powiadomień. W pokazanym numerze **cyfry zgodne z tym, co wpisałeś, są wyróżnione innym odcieniem** (zielony akcent, bez pogrubienia).
