@@ -282,8 +282,7 @@ main {
 }
 /* Podgląd zawsze rezerwuje 2 wiersze, by połączenie i wiadomość miały tę samą strukturę */
 .notif-preview { min-height: 84px; }
-/* Karta dopasowania numeru bez przycisków — wyśrodkuj treść w tej samej wysokości */
-.notif-card.hint { justify-content: center; gap: 18px; }
+/* Karta dopasowania numeru ma przyciski (ZADZWOŃ/Odrzuć) — układ od góry. */
 .notif-card.msg  { border-color: var(--blue); }
 .notif-card.call { border-color: var(--red); }
 .notif-head { display: flex; align-items: center; gap: 8px; }
@@ -309,8 +308,10 @@ main {
   display: flex; align-items: center; justify-content: center; gap: 10px;
   transition: transform .04s, box-shadow .04s, background .04s;
 }
-/* Karta-podpowiedź dopasowania numeru do kontaktu (bez przycisków) */
-.notif-card.hint { border-color: var(--green); gap: 12px; }
+/* Karta-podpowiedź dopasowania numeru do kontaktu. BEZ własnego gap — używa
+   tego samego justify-content:space-between co karty msg/call, by elementy
+   (awatar/nazwa/numer/przyciski) były na IDENTYCZNEJ wysokości. */
+.notif-card.hint { border-color: var(--green); }
 .notif-card.hint .notif-kind { color: var(--green); }
 .notif-card.hint .notif-from { display: flex; align-items: center; gap: 16px; }
 .hint-avatar {
@@ -374,6 +375,20 @@ main {
   content: "Wpisz, aby wyszukać";
   text-transform: none;
 }
+/* Znak aktualnie cyklowany w multi-tap (zanim się zatwierdzi) — wyróżniony,
+   by senior widział, którą literę właśnie wybiera z klawisza. */
+.num-display .cycling {
+  background: var(--green);
+  color: #FFF;
+  border-radius: 6px;
+  padding: 0 4px;
+}
+
+/* Kontakty: schowana klawiatura (więcej miejsca na listę). Klawiaturę zawsze
+   chowamy; pole filtra zostaje TYLKO gdy coś wpisano (widać czym filtrowano),
+   a przy pustym filtrze też znika dla maksimum przestrzeni. */
+.dialer.kbd-hidden .keypad { display: none; }
+.dialer.kbd-hidden.filter-empty .num-field { display: none; }
 
 .keypad {
   display: grid;
@@ -402,8 +417,18 @@ main {
   line-height: 1; letter-spacing: 0.5px;
 }
 .kletters:empty { display: none; }
-/* Na HOME (dialer telefoniczny) litery zbędne — ukryj bez zmiany layoutu. */
+/* Na HOME (dialer telefoniczny) litery 2-9 zbędne — ukryj bez zmiany layoutu. */
 #screen-home .kletters { visibility: hidden; }
+
+/* Klawisz 0 ma narysowane OBA podpisy (+ i ␣). Wybór zależny od ekranu:
+   HOME → tylko "+", Kontakty → tylko "␣". Drugi jest display:none (nie zajmuje
+   miejsca, by widoczny był wyśrodkowany). */
+.klabel-space { display: none; }                                   /* domyślnie ␣ ukryty */
+#screen-home .key-zero .klabel-plus { visibility: visible; }       /* na HOME pokaż "+" */
+#screen-contacts .key-zero .klabel-plus { display: none; }         /* w Kontaktach ukryj "+" */
+#screen-contacts .key-zero .klabel-space { display: inline; }      /* w Kontaktach pokaż "␣" */
+/* W Kontaktach * i # nieaktywne — ukryj (layout siatki zachowany). */
+#screen-contacts .key[data-digit="*"], #screen-contacts .key[data-digit="#"] { visibility: hidden; }
 /* Awatar ulubionego na klawiszu 1,2,3… (tylko HOME) — po prawej stronie klawisza. */
 /* Awatar ulubionego — duży, wypełnia klawisz z lekkim marginesem.
    Zaokrąglenie SPÓJNE z klawiszem (klawisz 30px, awatar wsunięty o 10px → 22px). */
@@ -421,13 +446,13 @@ main {
   box-shadow: 0 2px 6px rgba(0,0,0,.10);
   background: #E8EAED;
 }
-/* Mała ikonka latarki na klawiszu 0 (przytrzymaj = latarka) */
-.key-zero { position: relative; }
+/* Mała ikonka latarki na klawiszu # (przytrzymaj = latarka) */
+.key-hash { position: relative; }
 .key-flash {
   position: absolute; right: 12px; bottom: 8px;
   color: var(--muted);
 }
-.key-zero.flash-active .key-flash { color: #F9A825; }
+.key-hash.flash-active .key-flash { color: #F9A825; }
 
 .call-btn {
   height: var(--btn-h);
@@ -459,6 +484,8 @@ main {
   transition: transform .04s, box-shadow .04s, background .04s;
 }
 .del-btn svg { flex: none; }
+/* `display:flex` powyżej nadpisuje atrybut [hidden] — przywróć chowanie. */
+.del-btn[hidden] { display: none; }
 .del-btn:active {
   box-shadow: 0 2px 6px rgba(0,0,0,.10);
   background: #8E1515;
@@ -613,13 +640,37 @@ main {
 .message-sender { font-size: 34px; font-weight: 800; color: var(--ink); }
 .message-phone { font-size: 26px; font-weight: 700; color: var(--ink-soft); margin-top: 2px; }
 .message-time { font-size: 22px; color: var(--muted); margin-top: 2px; }
+/* Kontener konwersacji — kolumna dymków (przychodzące/wysłane). */
 .message-text {
+  display: flex; flex-direction: column; gap: 16px;
+}
+/* Dymek rozmowy. 'in' = przychodzący (lewo, szary), 'out' = wysłany (prawo, zielony). */
+.bubble {
+  max-width: 82%;
+  padding: 22px 26px;
+  border-radius: 24px;
+  font-size: 32px; line-height: 1.4;
+  word-wrap: break-word;
+}
+.bubble.in {
+  align-self: flex-start;
   background: var(--surface);
   border: 3px solid var(--line);
-  border-radius: 24px;
-  padding: 26px;
-  font-size: 32px; line-height: 1.4; color: var(--ink);
+  color: var(--ink);
+  border-bottom-left-radius: 8px;       /* „ogonek" po stronie nadawcy */
 }
+.bubble.out {
+  align-self: flex-end;
+  background: var(--green);
+  color: #FFF;
+  border-bottom-right-radius: 8px;      /* „ogonek" po Twojej stronie */
+}
+.bubble-time {
+  display: block; margin-top: 8px;
+  font-size: 22px; font-weight: 700;
+}
+.bubble.in .bubble-time { color: var(--muted); }
+.bubble.out .bubble-time { color: rgba(255,255,255,.8); }
 /* Załącznik MMS (zdjęcie) */
 .mms-attach[hidden] { display: none; }
 .mms-attach {
@@ -991,7 +1042,7 @@ html.dark .app-tile,
 html.dark .contact-card,
 html.dark .msg-card,
 html.dark .call-card,
-html.dark .message-text,
+html.dark .bubble.in,
 html.dark .mms-attach,
 html.dark .confirm-card,
 html.dark .ctrl-btn,

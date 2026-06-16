@@ -144,53 +144,76 @@ usuń nagłówek "Szczegóły symulacji:" i dolacz punkty do "Symulacje"
 
 funkcje.md nie powinno istniec bo bylu juz przeniesione do readme
 
-Suwak jak za malo miejsca na liscie kontaktow, polaczen, polaczen z ta osoba, wiadomosci - taki cienki custom w powietrzu nie zajmujacy miejsca
-
 "Ostatnie połączenia z tą osobą" zamień na "Połączenia z tym numerem"
 
 w kontakty przycisk czerwony na dole to "Bez klawiatury", a jak ja nacisniesz to znika klawiatura z widoku kontakty i sam czerwony przycisk zamienia sie w standardowe "[]Powiadomienia". daje to wiecej miejsca, mimo ze domyslnie wyswietla klaw zeby filtrowac
 
-
----
-
-moze inspo dotychczasowymi aplikacjami zeby ulepszyc wyglad
-
-Pod themey wystawic zmienne css z kolorami, ramkami, ikonkami i moze margin padding
-
-moze powinny byc polaczenia po prawej a wiadomosci po prawej, nie wiem, raczej nie ale kto wie? co wygodniej?
-
-Brak w klawiaturze spacji na kontaktach i plusa na ekranie glownym. Działających. Gwiazdka kratka tez brak
-
+Brak w kontaktach na klawiaturze spacji na zerze, i na ekranie głównej na klawiaturze plusa na zerze. Działających. Gwiazdka kratka tez brak dzialajacego
 
 w powiadomieniu "Dopasowanie do" brakuje przycisku "Zadzwoń" i "Odrzuć", a odrzuć wyłącznie czysciłoby caly wpisany numer na raz
-Regres ze nie ma "+x wiecej" gdy powiadomienie "dopasowania do numeru", o liczbie wiadomosci i poloczen
-
-chyba nie powinny tak latwo krawedzie po bokach sie klikac? bo ja przez przypadek dotykam
 
 Dodac takie ciut ciut opoznienie dxialania kazdego przycisku, zeby zmniejszyc szanse przypadkowego wcisniecia
 
-Lagodne ramki zamiast ostrych ramek przyciskow (łagodne jak odczytane wiadomosci, sprawdzone polaczenia) - na kafelkach, na klawiaturze, kontakty w kontaktach a wpisz numer/ wpisz aby wyszukac calkiem bez ramki, separator statusu tez telikatny
+dodac cycle button w kontakty z klawisza jeden w klawiaturze, ktory robi wybor myslnik podkreslnik znak zamytania
 
-Moze szare albo mniej intensywne oddzwon odrzuc w powiadomieniach zeby mniej przytlaczac? ale najpierw te ramki na cienie, moze to zmniejszy przytoczenie wystarczajaco
+doc: decyzja projektowa: uboga klawiatura, bo i tak tylko wybieranie numeru i filtr w kontaktach po slowach i napisac jakie znaki obsluguje a-z 0-9, polskie znaki, -_?*+$
 
+podswietl literke w pasku "wpisz aby wyszukac" ktora wlasnie wpisuje i jest w cyklu
 
-sym i nie tylko:
+w powiadomieniu "Dopasowanie do" brakuje przycisku
+  "Zadzwoń" i "Odrzuć", a odrzuć wyłącznie czysciłoby caly wpisany numer na raz (no wiec i powiadomienie "dopasowanie
+  do" by znikalo
+
+w powiedomieniu "Dopasowano do" przycisk zadzwon i odrzuc na innej wysokosci jest nizej niz w powiadomueniu wiadomosci/nieodebrane polaczenie. wyrownaj. zreszta tak samo jest nizej, awatar nazwa i numer
+
 w czytanie wiadomosci pokazuj cala konwersacje, wyslane wiadomosci tez. i zasymuluj taka rozmowe z konwersacja obustronna (w apce nie ma funkcji pisania ale odczytanie napisanych jak najbardziej moze być)
 
 do symulacji dodaj widomosc z dlugim tekstem wymagajacym przewijania
 
-Brak symulacji nieodebranej wideo rozmowy. Moze dodac ze w symulscji przycisnij kafelek poloczen czasem sie twozy nieodebrane wideo polaczenie a nie tylko zwykle polaczenia
+Brak symulacji nieodebranej wideo rozmowy. dodac ze w symulscji przycisnij kafelek poloczen czasem sie tworzy nieodebrane wideo polaczenie a nie tylko zwykle polaczenia
 
-
-drobne:
 brakuje oznaczenia w polaczeniach wideo rozmowy, pewnie w powiadomieniu o nieodebaranym też (aczkolwiek nie wiem czy na smartfonach jest to wyroznione ale pewnie jest ale sprawdz)
-
-"Dopasowano do wpisywanego numeru" zamien na ??
-
-bugi:
 
 Nadal nie naprawione ze jak powrot do glownego widoku to mruga pole numeru a nie ma wtedy mnugac. tym razem ci sie uda? to mruganeie tylko jak klikniesz zielone zadzwon na ekranie glownym a jest puste wpisz numer
 
+"Dopasowano do wpisywanego numeru" zamien na "Dopasowano do numeru"
+
+w konwersjacji w czytaj wiadomosc pelna data do kazdej wiadomosci
+
+jak zwine klaw w kontakty, potem klikne powiadomienia i potem wroce do kontakty, to znow ma byc rozwinieta klaw domyslnie w kontakty
+
+w light theme: Lagodne ramki zamiast ostrych ramek przyciskow (łagodne jak odczytane wiadomosci, sprawdzone polaczenia) - na kafelkach, na klawiaturze, kontakty w kontaktach a wpisz numer/ wpisz aby wyszukac calkiem bez ramki, separator statusu tez telikatny. w dark theme tylko wpisz numer/wpisz aby wyszukac bez ramek a reszta bez zmian bo juz i tak ma lagodne
+
+---
+
+
+moze inspo dotychczasowymi aplikacjami zeby ulepszyc wyglad
+
+Pod themesy wystawic zmienne css z kolorami, ramkami, ikonkami i moze margin padding
+
+moze powinny byc polaczenia po prawej a wiadomosci po prawej, nie wiem, raczej nie ale kto wie? co wygodniej?
+
+chyba nie powinny tak latwo krawedzie po bokach sie klikac? bo ja przez przypadek dotykam
+
+Moze szare albo mniej intensywne oddzwon odrzuc w powiadomieniach zeby mniej przytlaczac? ale najpierw te ramki na cienie, moze to zmniejszy przytoczenie wystarczajaco
+
+
+reszta:
+
+commit
+
+
+commit
+
+Suwak jak za malo miejsca na liscie polaczen, polaczen z ta osoba, wiadomosci, czytania wiadomosci - taki cienki custom w powietrzu nie zajmujacy miejsca  - taka jak w kontakty
+
+ponownie zrob to czego nie zrobione: doc:
+
+ponownie screeny do reademe i podmienic
+
+commit
+
+pull
 
 zaawansowane:
 
@@ -200,6 +223,6 @@ zaawansowane:
 
 Zawies rozmowe dwie rozmowy na raz - dodatkowy widok?
 
-* nowy projekt, tym razem natywna apka ktora robi to wszystko (znaczy ui tylko jeden do jeden), a nastepny krok podstawic tam faktyczne dane i funkcje. laucher (lekki) monolit, ma w sobie uprawnienia do: powiadomienia, wiadomosci, polaczenia, kontakty
+patrzenie na ekran glowny w trakcie rozmowy - wtedy rozmowa ktora jest w trakcie w miejscu powiedomienia
 
-* patrzenie na ekran glowny w trakcie rozmowy - wtedy rozmowa ktora jest w trakcie w miejscu powiedomienia
+nowy projekt, tym razem natywna apka ktora robi to wszystko (znaczy ui tylko jeden do jeden), a nastepny krok podstawic tam faktyczne dane i funkcje. laucher (lekki) monolit, ma w sobie uprawnienia do: powiadomienia, wiadomosci, polaczenia, kontakty

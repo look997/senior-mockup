@@ -97,8 +97,8 @@ Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 
 ### Czytanie wiadomości
 - Awatar, nazwa nadawcy, jego numer, data i godzina.
+- **Cała konwersacja w dymkach** — wiadomości **przychodzące** z lewej (szare) i **wysłane** przez użytkownika z prawej (zielone), każdy dymek z godziną. Długie rozmowy i długie pojedyncze wiadomości się przewijają.
 - Dla MMS — kafelek ze zdjęciem.
-- Pełna treść dużą czcionką.
 - Przyciski: zielony **Zadzwoń** do nadawcy, czerwony **Przeczytane**.
 
 ### Połączenia
@@ -155,7 +155,7 @@ Te funkcje działają realnie w makiecie (część efektu fizycznego — jak zap
 - Przeczytanie wiadomości — z panelu powiadomień albo z listy Wiadomości — zawsze zdejmuje ją z powiadomień.
 
 ### Podpowiedź dopasowania numeru a powiadomienia
-- Gdy wpisywany numer pasuje do **dokładnie jednego** kontaktu, w obszarze powiadomień pojawia się „Dopasowano do wpisywanego numeru" — **zamiast** powiadomień. W pokazanym numerze **cyfry zgodne z tym, co wpisałeś, są wyróżnione innym odcieniem** (zielony akcent, bez pogrubienia).
+- Gdy wpisywany numer pasuje do **dokładnie jednego** kontaktu, w obszarze powiadomień pojawia się „Dopasowano do numeru" — **zamiast** powiadomień. W pokazanym numerze **cyfry zgodne z tym, co wpisałeś, są wyróżnione innym odcieniem** (zielony akcent, bez pogrubienia).
 - **Zawsze co najwyżej jedno dopasowanie** — to świadome ograniczenie: podpowiedź pokazuje się tylko, gdy fragment cyfr pasuje do jednej osoby (i po wpisaniu min. 2 cyfr). Gdy pasuje kilku kontaktów (np. po jednej cyfrze) albo żaden — podpowiedzi nie ma, więc senior nigdy nie musi wybierać z listy kandydatów.
 - Jeśli wtedy przyjdzie nowa wiadomość/połączenie, to ono (świeższe, priorytetowe) pokazuje się **nad** dopasowaniem.
 - Po odhaczeniu świeżych powiadomień, gdy numer dalej wpisany, znów widać dopasowanie — płynny powrót.
@@ -170,6 +170,14 @@ Te funkcje działają realnie w makiecie (część efektu fizycznego — jak zap
 - Klawiatura na ekranie głównym i w Kontaktach to ten sam komponent o tej samej szerokości i pozycji.
 - Wszystkie dolne przyciski akcji mają **jedną wysokość** na wszystkich ekranach i kończą się na tej samej wysokości.
 - Przyciski są płaskie (bez efektu 3D), z miękko zaokrąglonymi rogami.
+
+### Uboga klawiatura (tylko 12 klawiszy)
+- Nie ma pełnej klawiatury QWERTY — wystarczy klasyczna **klawiatura telefoniczna 12 klawiszy** (1-9, *, 0, #), bo służy tylko do dwóch rzeczy: **wybierania numeru** (HOME) i **filtrowania kontaktów po słowach** (Kontakty, multi-tap T9). Mniej klawiszy = mniej do pomylenia.
+- **Obsługiwane znaki:**
+  - W **Kontaktach** (filtr T9, multi-tap): litery **a–z** i **polskie znaki** (ą ć ę ł ń ó ś ź ż), cyfry **0–9**, **spacja** (klawisz 0 — szukanie po dwóch słowach), oraz **`-` `_` `?`** (klawisz 1).
+  - Na **ekranie głównym** (numer): cyfry **0–9** oraz **`*` `#` `+`** (`+` przez przytrzymanie 0; `*` i `#` do numerów serwisowych).
+- Litery wpisuje się **multi-tap** (jak w dawnych telefonach): kolejne naciśnięcia tego samego klawisza cyklują dostępne znaki. **Aktualnie wybierany znak jest podświetlony** w polu wyszukiwania, dopóki się nie zatwierdzi (po chwili lub po naciśnięciu innego klawisza).
+- Klawisze `*` i `#` są aktywne tylko na ekranie głównym; w Kontaktach są ukryte (niepotrzebne w wyszukiwaniu).
 
 ### Numery i kontakty
 - Numery wszędzie formatowane jednolicie (kierunkowy osobno, cyfry po 3).
@@ -198,7 +206,7 @@ Te funkcje działają realnie w makiecie (część efektu fizycznego — jak zap
 
 ### Świadome ograniczenia zakresu (czego celowo nie ma i dlaczego)
 Nakładka ma być maksymalnie prosta dla seniora i **nie wypuszczać go poza siebie**. Dlatego świadomie pominięto:
-- **Pisanie i wysyłanie wiadomości** — wiadomości są tylko do odczytu; jedyna odpowiedź to oddzwonienie. Brak klawiatury tekstowej i ekranu redagowania.
+- **Pisanie i wysyłanie wiadomości** — wiadomości są tylko do **odczytu**. Widać **całą rozmowę, łącznie z wiadomościami wysłanymi** (te z prawej, zielone) — czyli historię konwersacji da się przeczytać. Ale **nie da się napisać ani wysłać** nowej wiadomości: nie ma klawiatury tekstowej ani pola redagowania. Jedyna odpowiedź na wiadomość to oddzwonienie. (Odczyt wysłanych ≠ możliwość wysyłania.)
 - **Usuwanie wiadomości** — nie ma kasowania ze skrzynki; wiadomości tylko się czyta i oznacza jako przeczytane (mniej akcji do pomylenia, brak ryzyka utraty czegoś ważnego).
 - **Osobny kalendarz i alarmy** — brak aplikacji kalendarza, budzika czy przypomnień. Tego rodzaju funkcje są poza zakresem prostego launchera.
 - **Aplikacja aparatu** — brak aparatu/galerii. Robienie i przeglądanie zdjęć to osobny, złożony świat (uprawnienia, podgląd, zarządzanie plikami); nakładka skupia się na dzwonieniu i wiadomościach.
@@ -217,7 +225,7 @@ Sztuczne wywołanie tego, co normalnie przychodzi z zewnątrz.
 - **Połączenie przychodzące — głosowe** (Połączenie przychodzące) — przytrzymaj przycisk **Zadzwoń** na ekranie głównym.
 - **Połączenie przychodzące — wideo** (Połączenie przychodzące → Wideorozmowa) — przytrzymaj kafel **Kontakty**.
 - **Nowa wiadomość** (Wiadomości, Powiadomienia) — przytrzymaj kafel **Wiadomości**. Dodaje nowy wpis na górę skrzynki, pokazuje powiadomienie i gra dźwięk.
-- **Nowe nieodebrane połączenie** (Połączenia, Powiadomienia) — przytrzymaj kafel **Połączenia**. Dodaje nowe nieodebrane na górę listy i powiadomienie.
+- **Nowe nieodebrane połączenie** (Połączenia, Powiadomienia) — przytrzymaj kafel **Połączenia**. Dodaje nowe nieodebrane na górę listy i powiadomienie. **Czasem (dla części dzwoniących) jest to nieodebrana wideorozmowa** — oznaczona na liście i w powiadomieniu jako „Nieodebrana wideorozmowa", a nie zwykłe „Nieodebrane".
 - **Pomarańczowa kropka powiadomień ogólnych** (Pasek statusu) — przytrzymaj strefę **baterii** (prawa strona oczka); ponowne przytrzymanie ją gasi.
 - **Powiadomienia startowe** — po uruchomieniu w kolejce powiadomień są już domyślne nieprzeczytane wiadomości i nieodebrane połączenia (znaczniki z liczbą na kaflach pokazują ich liczbę). Stanowią punkt wyjścia do przeglądania.
 - **Faza nawiązywania ~2 s** — przy połączeniu wychodzącym przez około dwie sekundy widać status „Nawiązywanie połączenia…", po czym status zmienia się na „Trwa połączenie" i rusza licznik. To symulacja czasu zestawiania.

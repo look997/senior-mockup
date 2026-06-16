@@ -39,6 +39,15 @@ function formatPhone(raw) {
   for (let i = 0; i < d.length; i += 3) groups.push(d.slice(i, i + 3));
   return prefix + groups.join(' ');
 }
+// Wyświetlanie wpisywanego ciągu na dialerze HOME. Formatuj ładnie (formatPhone)
+// tylko gdy to "zwykły" numer (cyfry, ewentualnie wiodące +48). Gdy są znaki
+// specjalne (* #) albo + nie jest poprawnym wiodącym +48 — pokaż surowo, bo
+// formatPhone by je zgubił (numery serwisowe *100#, samo "+", "+1" itp.).
+function formatDial(raw) {
+  if (!raw) return '';
+  const plain = !/[*#]/.test(raw) && (!raw.includes('+') || /^\+48/.test(raw));
+  return plain ? formatPhone(raw) : raw;
+}
 function nameForPhone(num) {
   const d = digitsOnly(num);
   if (d.length < 3) return null;
@@ -59,6 +68,14 @@ const messages = [
     sender: 'Anna Nowak', initials: 'AN', color: 'av-green', phone: '+48 602 345 678',
     preview: 'Mamo, będę u Ciebie o 17:00, kupić coś po drodze?', time: '16 cze, 14:05', unread: true, mms: false,
     body: 'Mamo, będę u Ciebie o 17:00. Kupić coś po drodze? Daj znać, to wezmę chleb i mleko. Buziaki!',
+    // Cała rozmowa: 'in' = od Anny (lewo, szare), 'out' = wysłane przez Ciebie (prawo, zielone).
+    thread: [
+      { from: 'in',  text: 'Cześć Mamo! Jak się dziś czujesz?', time: '16 cze, 13:40' },
+      { from: 'out', text: 'Dzień dobry córeczko, dobrze. Trochę nudno.', time: '16 cze, 13:46' },
+      { from: 'in',  text: 'To wpadnę po pracy. Będę u Ciebie o 17:00.', time: '16 cze, 13:52' },
+      { from: 'out', text: 'Super! Bardzo się cieszę.', time: '16 cze, 13:55' },
+      { from: 'in',  text: 'Kupić coś po drodze? Daj znać, to wezmę chleb i mleko. Buziaki!', time: '16 cze, 14:05' },
+    ],
   },
   {
     sender: 'Zofia Wiśniewska', initials: 'ZW', color: 'av-red', phone: '+48 603 456 789',
@@ -79,6 +96,11 @@ const messages = [
     sender: 'Marek Lewandowski', initials: 'ML', color: 'av-purple', phone: '+48 604 567 890',
     preview: 'Dzień dobry, dzwoniłem wczoraj. Oddzwonię wieczorem.', time: '13 cze, 18:40', unread: false, mms: false,
     body: 'Dzień dobry, dzwoniłem wczoraj ale nie odebrałaś. Nic pilnego — oddzwonię wieczorem po 19:00. Pozdrawiam, Marek.',
+  },
+  {
+    sender: 'Spółdzielnia Mieszkaniowa', initials: 'SM', color: 'av-blue', phone: '+48 22 555 10 20',
+    preview: 'Informacja o przerwie w dostawie ciepłej wody w dniach 18–19 czerwca.', time: '12 cze, 10:15', unread: false, mms: false,
+    body: 'Szanowni Mieszkańcy,\n\nUprzejmie informujemy, że w dniach 18–19 czerwca (środa–czwartek) w godzinach od 8:00 do 16:00 nastąpi przerwa w dostawie ciepłej wody użytkowej. Przerwa jest związana z planowanymi pracami konserwacyjnymi sieci ciepłowniczej oraz wymianą zaworów w węźle cieplnym przy ulicy Kwiatowej 3.\n\nProsimy o zabezpieczenie odpowiedniej ilości wody na czas prac oraz o nieodkręcanie kranów ciepłej wody w tym okresie, aby uniknąć zapowietrzenia instalacji. Po zakończeniu prac woda może być początkowo zabarwiona — należy ją chwilę spuścić.\n\nW razie pytań prosimy o kontakt z administracją pod numerem 22 555 10 20 w godzinach 8:00–15:00. Za utrudnienia serdecznie przepraszamy.\n\nZ poważaniem,\nZarząd Spółdzielni Mieszkaniowej',
   },
 ];
 
@@ -131,12 +153,18 @@ const KEYS = [
 // Mała ikonka latarki — pokazywana na klawiszu 0 (przytrzymaj = latarka).
 const FLASH_MINI = '<svg class="key-flash" width="22" height="26" viewBox="0 0 18 24" aria-hidden="true"><path d="M4 2h10l-1.5 8h3.5L7 23l2-9H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
 function buildKeypad(keypadEl) {
-  keypadEl.innerHTML = KEYS.map((k) =>
-    '<button class="key' + (k.d === '0' ? ' key-zero' : '') + '" data-digit="' + k.d + '">' +
+  keypadEl.innerHTML = KEYS.map((k) => {
+    // Klawisz 0: RYSUJEMY oba podpisy (+ dla numeru, ␣ dla filtra). CSS pokazuje
+    // właściwy zależnie od ekranu (HOME → +, Kontakty → ␣). Reszta: zwykłe litery.
+    const letters = (k.d === '0')
+      ? '<span class="kletters klabel-plus">+</span><span class="kletters klabel-space">␣</span>'
+      : '<span class="kletters">' + k.l + '</span>';
+    return '<button class="key' + (k.d === '0' ? ' key-zero' : '') + (k.d === '#' ? ' key-hash' : '') +
+      '" data-digit="' + k.d + '">' +
     '<span class="kdigit">' + k.d + '</span>' +
-    '<span class="kletters">' + k.l + '</span>' +
-    (k.d === '0' ? FLASH_MINI : '') + '</button>'
-  ).join('');
+    letters +
+    (k.d === '#' ? FLASH_MINI : '') + '</button>';   // ikona latarki na # (przytrzymaj = latarka)
+  }).join('');
 }
 // Na klawiaturze HOME (litery ukryte) pokaż awatary ulubionych na klawiszach
 // 1,2,3… — w kolejności listy ulubionych (przytrzymanie = szybkie wybieranie).
@@ -289,11 +317,11 @@ function attachLongPress(el, handler, ms) {
   }, true);
 }
 
-// ---------------- LATARKA (toggle wizualny; przytrzymaj 0) ----------------
+// ---------------- LATARKA (toggle wizualny; przytrzymaj #) ----------------
 let flashOn = false;
 function toggleFlash() {
   flashOn = !flashOn;
-  document.querySelectorAll('.key-zero').forEach((k) => k.classList.toggle('flash-active', flashOn));
+  document.querySelectorAll('.key-hash').forEach((k) => k.classList.toggle('flash-active', flashOn));
   document.documentElement.classList.toggle('flash-on', flashOn);
   buzz(flashOn ? 25 : 15);
 }
@@ -315,6 +343,9 @@ function currentScreenId() {
 // Ghost-click rozwiązany u źródła przez pointerdown na przyciskach akcji
 // (Zadzwoń itd.), więc globalny strażnik nie jest potrzebny — był szkodliwy
 // (blokował legalne kliknięcia tuż po nawigacji).
+// Znacznik czasu ostatniej zmiany ekranu — Zadzwoń ignoruje "ghost-click"
+// (kliknięcie tuż po nawigacji, np. powrót przyciskiem leżącym tam gdzie Zadzwoń).
+let lastScreenChangeAt = 0;
 function showScreen(id) {
   const prev = currentScreenId();
   // Opuszczając ekran połączenia przychodzącego — zawsze ucisz dzwonek
@@ -323,6 +354,9 @@ function showScreen(id) {
   screens.forEach((s) => s.classList.remove('active'));
   const target = document.getElementById('screen-' + id);
   if (target) target.classList.add('active');
+  lastScreenChangeAt = Date.now();
+  // Wejście na Kontakty → klawiatura zawsze rozwinięta (domyślny stan filtra).
+  if (id === 'contacts' && prev !== 'contacts') showContactsKbd();
   // Lista ukrytego ekranu ma wymiary 0 — przelicz kciuki suwaka po pokazaniu.
   if (typeof updateAllScrollbars === 'function') requestAnimationFrame(updateAllScrollbars);
   buzz(15);
@@ -448,7 +482,7 @@ function renderContacts() {
 // Sekwencje multi-tap (cykl liter + cyfra) dla trybu filtra w Kontaktach.
 // Kolejne naciśnięcia tego samego klawisza cyklują: 5 → j, k, l, ł, 5, j, ...
 const CYCLE = {
-  '1': ['1'],
+  '1': ['-', '_', '?', '1'],
   '2': ['a', 'b', 'c', 'ą', 'ć', '2'],
   '3': ['d', 'e', 'f', 'ę', '3'],
   '4': ['g', 'h', 'i', '4'],
@@ -461,6 +495,8 @@ const CYCLE = {
 };
 
 // ---------------- DIALERY (tryb 'phone' = numer; 'filter' = multi-tap T9) ----------------
+let clearDialNumber = () => {};   // ustawiane przez dialer HOME — czyści wpisany numer
+let showContactsKbd = () => {};   // ustawiane przez dialer Kontaktów — rozwija klawiaturę
 document.querySelectorAll('.dialer').forEach((dialer) => {
   const mode = dialer.dataset.mode || 'phone';
   const display = dialer.querySelector('[data-role="display"]');
@@ -476,27 +512,69 @@ document.querySelectorAll('.dialer').forEach((dialer) => {
   if (mode === 'phone') addFavAvatarsToKeypad(keypad);   // awatary ulubionych na 1,2,3…
 
   const wideClass = (mode === 'filter') ? 'del-btn del-wide' : 'del-btn';
+  // Kontakty: czy klawiatura jest schowana (więcej miejsca na listę).
+  let kbdHidden = false;
+  // Drugi przycisk (tylko filter, gdy klawiatura schowana): "Powiadomienia" → HOME.
+  // redBtn w tym stanie staje się "Klawiatura" (przywraca klawiaturę).
+  let notifBtn = null;
+  if (mode === 'filter') {
+    notifBtn = document.createElement('button');
+    notifBtn.className = 'del-btn del-wide';
+    notifBtn.hidden = true;
+    notifBtn.innerHTML = SVG.keypadWhite + '<span>Powiadomienia</span>';
+    notifBtn.addEventListener('click', () => showScreen('home'));
+    // Powiadomienia z LEWEJ (przed redBtn=Klawiatura, który zostaje z prawej).
+    redBtn.parentNode.insertBefore(notifBtn, redBtn);
+  }
   function updateRedButton() {
     redBtn.className = wideClass;
+    if (mode === 'filter' && kbdHidden) {
+      // Klawiatura schowana → redBtn = "Klawiatura" (strzałka w GÓRĘ), z prawej; obok "Powiadomienia".
+      redBtn.innerHTML = '<span class="swipe-arrow">▲</span><span>Klawiatura</span>';
+      if (notifBtn) notifBtn.hidden = false;
+      return;
+    }
+    if (notifBtn) notifBtn.hidden = true;
     if (value.length > 0) {
       redBtn.innerHTML = SVG.backspaceWhite + '<span>Usuń</span>';
     } else if (mode === 'phone') {
       redBtn.innerHTML = SVG.lockWhite + '<span>Zablokuj</span>';
     } else {
-      // Kontakty, puste pole → "Powiadomienia" (powrót na HOME).
-      redBtn.innerHTML = SVG.keypadWhite + '<span>Powiadomienia</span>';
+      // Kontakty, klawiatura widoczna, puste pole → "Bez klawiatury" (strzałka w DÓŁ).
+      redBtn.innerHTML = '<span class="swipe-arrow">▼</span><span>Bez klawiatury</span>';
     }
   }
+  function setKbdHidden(hidden) {
+    kbdHidden = hidden;
+    dialer.classList.toggle('kbd-hidden', hidden);
+    // Pole filtra chowamy tylko gdy schowana klawiatura I pusty filtr.
+    dialer.classList.toggle('filter-empty', value.length === 0);
+    updateRedButton();
+  }
   function render() {
-    // W trybie telefonu formatuj numer (separator co 3 cyfry); w filtrze pokaż litery.
-    display.textContent = (mode === 'phone') ? formatPhone(value) : value;
-    if (mode === 'filter') { contactFilter = value; renderContacts(); }
+    // W trybie telefonu formatuj numer (separator co 3 cyfry, ale * # + zachowane);
+    // w filtrze pokaż litery. Podczas multi-tap (lastKey != null) ostatni znak
+    // jest właśnie cyklowany — podświetl go, by senior widział co wpisuje.
+    if (mode === 'phone') {
+      display.textContent = formatDial(value);
+    } else if (lastKey !== null && value.length > 0) {
+      display.innerHTML = esc(value.slice(0, -1)) + '<span class="cycling">' + esc(value.slice(-1)) + '</span>';
+    } else {
+      display.textContent = value;
+    }
+    if (mode === 'filter') {
+      contactFilter = value; renderContacts();
+      dialer.classList.toggle('filter-empty', value.length === 0);
+    }
     if (mode === 'phone') updateNumberHint(value);   // podpowiedź kontaktu nad dialerem
     updateRedButton();
   }
   function commitCycle() {
+    const wasCycling = lastKey !== null;
     lastKey = null; cycleIdx = 0;
     if (commitTimer) { clearTimeout(commitTimer); commitTimer = null; }
+    // Zatwierdzenie cyklu — przerysuj, by zdjąć podświetlenie ostatniego znaku.
+    if (wasCycling) render();
   }
 
   keypad.addEventListener('click', (e) => {
@@ -529,9 +607,10 @@ document.querySelectorAll('.dialer').forEach((dialer) => {
 
   redBtn.addEventListener('click', () => {
     if (redBtn.dataset.lp === '1') { redBtn.dataset.lp = '0'; return; } // po long-pressie (Zablokuj)
+    if (mode === 'filter' && kbdHidden) { setKbdHidden(false); buzz(15); return; }  // "Klawiatura" → przywróć
     if (value.length > 0) { value = value.slice(0, -1); commitCycle(); render(); buzz(15); }
     else if (mode === 'phone') { buzz([8, 30, 8]); /* "Zablokuj" wymaga przytrzymania */ }
-    else { showScreen('home'); }
+    else { setKbdHidden(true); buzz(15); }   // Kontakty, puste pole → "Bez klawiatury" → schowaj
   });
   // Zablokuj wymaga PRZYTRZYMANIA przycisku (gdy pole puste, tryb telefonu).
   if (mode === 'phone') {
@@ -552,6 +631,9 @@ document.querySelectorAll('.dialer').forEach((dialer) => {
       callArmed = false;
       if (mode !== 'phone') return;
       if (!value) {
+        // Ghost-click po powrocie na HOME (przycisk powrotu leży tam gdzie Zadzwoń):
+        // nie migaj polem, jeśli kliknięcie nastąpiło tuż po zmianie ekranu.
+        if (Date.now() - lastScreenChangeAt < 400) return;
         numField.classList.remove('flash');
         void numField.offsetWidth;     // restart animacji
         numField.classList.add('flash');
@@ -568,9 +650,18 @@ document.querySelectorAll('.dialer').forEach((dialer) => {
     attachLongPress(call, () => simulateIncoming());
   }
 
-  // Long-press klawisza 0 = latarka (na obu dialerach).
-  const zeroKey = keypad.querySelector('.key-zero');
-  if (zeroKey) attachLongPress(zeroKey, () => toggleFlash());
+  // Long-press klawisza # = latarka (przeniesione z 0, bo długie 0 = "+").
+  const hashKey = keypad.querySelector('.key[data-digit="#"]');
+  if (hashKey) attachLongPress(hashKey, () => toggleFlash());
+
+  // Long-press klawisza 0 = wpisz "+" (tylko dialer numeru; w filtrze 0 = spacja).
+  if (mode === 'phone') {
+    const zeroKey = keypad.querySelector('.key-zero');
+    if (zeroKey) attachLongPress(zeroKey, () => {
+      if (value.length >= 18) { buzz(10); return; }
+      value += '+'; render(); buzz([10, 25]);
+    });
+  }
 
   // Long-press klawiszy 1-9 na HOME = szybkie wybieranie ulubionych (po kolei z listy).
   if (mode === 'phone') {
@@ -587,6 +678,17 @@ document.querySelectorAll('.dialer').forEach((dialer) => {
     });
   }
 
+  // Wystaw czyszczenie numeru (dla przycisku "Odrzuć" na karcie dopasowania).
+  // Czyści CAŁY wpisany numer naraz → znika też karta "Dopasowano…".
+  if (mode === 'phone') {
+    clearDialNumber = () => { value = ''; commitCycle(); render(); };
+  }
+
+  if (mode === 'filter') {
+    dialer.classList.add('filter-empty');   // start: pole puste
+    // Wejście na ekran Kontaktów ZAWSZE rozwija klawiaturę (domyślny stan).
+    showContactsKbd = () => { if (kbdHidden) setKbdHidden(false); };
+  }
   updateRedButton();
 });
 
@@ -958,6 +1060,12 @@ const msgReadBtn = document.getElementById('message-read');
 let openMessageSender = null;
 let openedFromNotif = false;   // czy weszliśmy w wiadomość z powiadomienia
 
+// Pojedynczy dymek konwersacji. esc() + \n → <br>, by zachować akapity długiego tekstu.
+function bubbleHTML(from, text, time) {
+  const body = esc(text).replace(/\n/g, '<br>');
+  const t = time ? '<span class="bubble-time">' + esc(time) + '</span>' : '';
+  return '<div class="bubble ' + (from === 'out' ? 'out' : 'in') + '">' + body + t + '</div>';
+}
 function openMessage(i, fromNotif) {
   const m = messages[i];
   openedFromNotif = !!fromNotif;
@@ -966,11 +1074,18 @@ function openMessage(i, fromNotif) {
   msgSender.textContent = m.sender;
   msgPhone.textContent = formatPhone(m.phone) || '';
   msgTime.textContent = m.time;
-  msgText.textContent = m.body || m.preview;
+  // Cała konwersacja jako dymki, jeśli jest wątek; inaczej pojedynczy dymek (treść).
+  if (m.thread && m.thread.length) {
+    msgText.innerHTML = m.thread.map((b) => bubbleHTML(b.from, b.text, b.time)).join('');
+  } else {
+    msgText.innerHTML = bubbleHTML('in', m.body || m.preview, null);
+  }
   msgMms.hidden = !m.mms;          // pokaż załącznik MMS tylko dla MMS
   openMessageSender = m.sender;
   if (m.unread) { m.unread = false; updateBadges(); renderInbox(); }
   removeMsgNotif(m);   // odczyt (z listy lub powiadomienia) zdejmuje ją z powiadomień
+  const mb = document.getElementById('message-body');
+  if (mb) mb.scrollTop = 0;        // nowa wiadomość — od góry
   showScreen('message');
 }
 msgCallBtn.addEventListener('click', () => {
@@ -1086,7 +1201,7 @@ function buildTopNotifCard() {
   } else {
     const c = n.ref;
     card.innerHTML =
-      '<div class="notif-head"><span class="notif-kind">Nieodebrane połączenie</span>' + more + '</div>' +
+      '<div class="notif-head"><span class="notif-kind">' + (c.video ? 'Nieodebrana wideorozmowa' : 'Nieodebrane połączenie') + '</span>' + more + '</div>' +
       '<div class="notif-from">' + avatarHTML(c.name) + c.name + '</div>' +
       '<div class="notif-preview">' + formatPhone(c.phone) + ' · ' + c.time + '</div>' +
       '<div class="notif-actions">' +
@@ -1115,12 +1230,32 @@ let hintBaseline = null;
 
 // Wpisany numer w chwili dopasowania — by podświetlić pasujące cyfry na karcie.
 let currentHintTyped = '';
-// Buduje kartę info o dopasowaniu numeru (pasujące cyfry innym odcieniem).
-function hintCardHTML(match) {
-  return '<div class="notif-card hint">' +
-    '<div class="notif-head"><span class="notif-kind">Dopasowano do wpisywanego numeru</span></div>' +
+// Buduje kartę dopasowania numeru (pasujące cyfry innym odcieniem) z akcjami:
+// ZADZWOŃ (do dopasowanego kontaktu) i ODRZUĆ (czyści cały wpisany numer naraz,
+// przez co znika też ta karta). Zwraca element z podpiętymi handlerami.
+function buildHintCard(match) {
+  const card = document.createElement('div');
+  card.className = 'notif-card hint';
+  // Gdy widać dopasowanie, wszystkie powiadomienia w kolejce są UŚPIONE pod nim
+  // (świeższych brak — taki jest warunek pokazania karty). Licznik "+N więcej"
+  // informuje, ile wiadomości/połączeń czeka i wróci po wyczyszczeniu numeru.
+  const more = notifQueue.length > 0 ? '<span class="notif-count">+' + notifQueue.length + ' więcej</span>' : '';
+  card.innerHTML =
+    '<div class="notif-head"><span class="notif-kind">Dopasowano do numeru</span>' + more + '</div>' +
     '<div class="notif-from"><span class="hint-avatar ' + match.color + '">' + match.initials + '</span>' + esc(match.name) + '</div>' +
-    '<div class="notif-preview">' + highlightPhone(match.phone, currentHintTyped) + '</div></div>';
+    '<div class="notif-preview">' + highlightPhone(match.phone, currentHintTyped) + '</div>' +
+    '<div class="notif-actions">' +
+      '<button class="notif-green" data-act="call">ZADZWOŃ</button>' +
+      '<button class="notif-red" data-act="dismiss">Odrzuć</button>' +
+    '</div>';
+  card.querySelector('[data-act="call"]').addEventListener('click', () => {
+    openConfirm(match.name, match.phone); buzz(20);
+  });
+  card.querySelector('[data-act="dismiss"]').addEventListener('click', () => {
+    clearDialNumber();   // czyści cały numer → updateNumberHint('') → karta znika
+    buzz(15);
+  });
+  return card;
 }
 
 // MODEL — JEDEN obszar, jak dawniej:
@@ -1139,7 +1274,7 @@ function renderNotifStack() {
 
   if (currentHintMatch && freshCount === 0) {
     // Dopasowanie przejmuje obszar — ZAMIAST powiadomień (jak dawniej).
-    notifStack.innerHTML = hintCardHTML(currentHintMatch);
+    notifStack.appendChild(buildHintCard(currentHintMatch));
   } else if (notifQueue.length > 0) {
     // Widać najnowsze powiadomienie (świeższe = priorytet, nad dopasowaniem).
     const top = buildTopNotifCard();
@@ -1184,10 +1319,11 @@ const SIM_SENDERS = [
   { sender: '+48 720 145 900', initials: '?', color: 'av-gray', phone: '+48 720 145 900', unknown: true,
     preview: 'Kurier dostarczy paczkę dziś 12-16.', body: 'Kurier dostarczy paczkę dziś między 12:00 a 16:00. Numer: PX99213.', mms: false },
 ];
+// video: true → symulowane nieodebrane jest WIDEOrozmową (część dzwoniących).
 const SIM_CALLERS = [
-  { name: 'Zofia Wiśniewska', phone: '+48 603 456 789' },
+  { name: 'Zofia Wiśniewska', phone: '+48 603 456 789', video: true },
   { name: '+48 511 882 030', phone: '+48 511 882 030', unknown: true },
-  { name: 'Jan Kowalski', phone: '+48 601 234 567' },
+  { name: 'Jan Kowalski', phone: '+48 601 234 567', video: true },
   { name: '+48 790 600 411', phone: '+48 790 600 411', unknown: true },
 ];
 let nextMsgIdx = 0, nextCallIdx = 0;
@@ -1228,9 +1364,11 @@ attachLongPress(document.getElementById('messages-tile'), () => {
 });
 attachLongPress(document.getElementById('calls-tile'), () => {
   const t = SIM_CALLERS[nextCallIdx % SIM_CALLERS.length]; nextCallIdx++;
-  // NOWE nieodebrane połączenie na górze listy.
-  const c = { name: t.name, phone: t.phone, dir: 'missed', label: 'Nieodebrane',
-              time: simStamp(), dur: null, handled: false, unknown: !!t.unknown };
+  // NOWE nieodebrane połączenie na górze listy. Część dzwoniących to WIDEOrozmowy
+  // (t.video) → etykieta "Nieodebrana wideorozmowa" zamiast zwykłego "Nieodebrane".
+  const c = { name: t.name, phone: t.phone, dir: 'missed',
+              label: t.video ? 'Nieodebrana wideorozmowa' : 'Nieodebrane',
+              video: !!t.video, time: simStamp(), dur: null, handled: false, unknown: !!t.unknown };
   calls.unshift(c);
   updateBadges(); renderCalls();
   pushCallNotif(c);
