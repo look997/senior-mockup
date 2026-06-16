@@ -27,37 +27,36 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Ukryj paski przewijania — to ekran dotykowy. KLUCZOWE: dzięki temu lista
-   przewijana NIE rezerwuje miejsca na scrollbar, więc dialer pod nią ma
-   IDENTYCZNĄ szerokość jak na ekranie głównym (gdzie listy nie ma). */
+/* Przewijane listy: CIENKI natywny scrollbar + scrollbar-gutter:stable, który
+   rezerwuje stałe miejsce na pasek — szerokość listy/dialera się NIE zmienia,
+   niezależnie czy pasek jest widoczny. Prosto i bez rozpychania (żadnego JS). */
 .contacts-list, .messages-body, .calls-body, .message-body, .inbox-list, .calls-list {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  scrollbar-color: rgba(60, 66, 75, 0.38) transparent;   /* kciuk / tło ścieżki */
 }
 .contacts-list::-webkit-scrollbar,
 .messages-body::-webkit-scrollbar,
 .calls-body::-webkit-scrollbar,
 .message-body::-webkit-scrollbar,
 .inbox-list::-webkit-scrollbar,
-.calls-list::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
-
-/* Cienki własny suwak „w powietrzu" — nakładkowy, NIE zajmuje miejsca w layoucie
-   (position:absolute w przewijanej liście), czysto wizualny (pointer-events:none).
-   Widoczny tylko gdy treść się nie mieści (sterowane JS-em: klasa .has-scroll). */
-.scroll-host { position: relative; }
-.scroll-thumb {
-  position: absolute;
-  right: 5px;
-  width: 5px;
-  border-radius: 3px;
-  background: rgba(60, 66, 75, 0.38);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .2s;
-  z-index: 5;
+.calls-list::-webkit-scrollbar { width: 8px; }
+.contacts-list::-webkit-scrollbar-thumb,
+.messages-body::-webkit-scrollbar-thumb,
+.calls-body::-webkit-scrollbar-thumb,
+.message-body::-webkit-scrollbar-thumb,
+.inbox-list::-webkit-scrollbar-thumb,
+.calls-list::-webkit-scrollbar-thumb { background: rgba(60, 66, 75, 0.38); border-radius: 4px; }
+html.dark .contacts-list, html.dark .messages-body, html.dark .calls-body,
+html.dark .message-body, html.dark .inbox-list, html.dark .calls-list {
+  scrollbar-color: rgba(220, 226, 235, 0.34) transparent;
 }
-.scroll-host.has-scroll .scroll-thumb { opacity: 1; }
-html.dark .scroll-thumb { background: rgba(220, 226, 235, 0.34); }
+html.dark .contacts-list::-webkit-scrollbar-thumb,
+html.dark .messages-body::-webkit-scrollbar-thumb,
+html.dark .calls-body::-webkit-scrollbar-thumb,
+html.dark .message-body::-webkit-scrollbar-thumb,
+html.dark .inbox-list::-webkit-scrollbar-thumb,
+html.dark .calls-list::-webkit-scrollbar-thumb { background: rgba(220, 226, 235, 0.34); }
 
 html, body {
   width: 100%;

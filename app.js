@@ -1490,51 +1490,14 @@ function openSettingsGate() {
   alert('Wrota otwarte. W pełnej aplikacji systemowej nastąpiłoby teraz przejście do natywnego ekranu telefonu / ustawień.');
 }
 
-// ---------------- CIENKI WŁASNY SUWAK (overlay, nie zajmuje miejsca) ----------------
-// Dla każdej przewijanej listy: kciuk .scroll-thumb pozycjonowany absolutnie,
-// którego rozmiar/pozycję liczymy z scrollTop/scrollHeight/clientHeight. Widoczny
-// (klasa .has-scroll) tylko gdy treść się nie mieści. Min. wysokość kciuka 40px.
-const SCROLL_LIST_IDS = ['contacts-list', 'inbox-list', 'calls-list', 'contact-history-list'];
-function updateScrollbar(list) {
-  const thumb = list._thumb;
-  if (!thumb) return;
-  const { scrollHeight, clientHeight, scrollTop } = list;
-  if (scrollHeight <= clientHeight + 1) { list.classList.remove('has-scroll'); return; }
-  list.classList.add('has-scroll');
-  const track = clientHeight;
-  const h = Math.max(40, Math.round(track * clientHeight / scrollHeight));
-  const maxTop = track - h;
-  const top = Math.round((scrollTop / (scrollHeight - clientHeight)) * maxTop);
-  thumb.style.height = h + 'px';
-  // +scrollTop, by kciuk „płynął" z widocznym obszarem (jest dzieckiem scroll-kontenera).
-  thumb.style.transform = 'translateY(' + (scrollTop + top) + 'px)';
-}
-// Dołącza kciuk jeśli go brak (render list robi innerHTML='' i go usuwa) i przelicza.
-// Rozmiar/pozycję liczymy po następnej klatce, bo świeżo wstawione karty muszą się
-// najpierw rozłożyć (scrollHeight musi być policzony).
-function refreshScrollbar(list) {
-  if (!list) return;
-  list.classList.add('scroll-host');
-  if (!list._thumb || !list.contains(list._thumb)) {
-    const thumb = document.createElement('div');
-    thumb.className = 'scroll-thumb';
-    list.appendChild(thumb);
-    list._thumb = thumb;
-    if (!list._scrollBound) {
-      list.addEventListener('scroll', () => updateScrollbar(list), { passive: true });
-      list._scrollBound = true;
-    }
-  }
-  requestAnimationFrame(() => updateScrollbar(list));
-}
-function updateAllScrollbars() {
-  SCROLL_LIST_IDS.forEach((id) => refreshScrollbar(document.getElementById(id)));
-}
-function setupScrollbars() { updateAllScrollbars(); }
-// Wywoływane z renderów list, by kciuk odtworzyć po przebudowie zawartości.
-function refreshScrollbarById(id) { refreshScrollbar(document.getElementById(id)); }
-// Po zmianie rozmiaru okna geometria list się zmienia — przelicz kciuki.
-window.addEventListener('resize', updateAllScrollbars);
+// ---------------- SCROLLBAR ----------------
+// Przewijanie list załatwia natywny cienki scrollbar (CSS scrollbar-width:thin +
+// scrollbar-gutter:stable). Dawny ręczny suwak (kciuk .scroll-thumb) usunięty —
+// przesuwany transformem rozpychał scrollHeight (lista "rosła" przy scrollu).
+// Funkcje zostają jako no-op, bo są wołane z renderów; nic nie robią.
+function updateAllScrollbars() {}
+function setupScrollbars() {}
+function refreshScrollbarById() {}
 
 // ---------------- INICJALIZACJA ----------------
 // Wycisz/Odcisz TYLKO przez przytrzymanie (nie zwykły klik — by nie wyciszać przypadkiem).

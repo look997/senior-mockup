@@ -188,6 +188,9 @@ bug: wpisanie spacja w trakcie jeszcze cyklu, gdy jeszcze wpisana spacja podswie
 
 kontakty ma buga, ze jak dojade do konca listy to nadal sie przewija ale wolniej w pusta przestrzen. napraw
 
+Suwak jak za malo miejsca na liscie: polaczen, polaczen z tym numerem, wiadomosci, czytania wiadomosci - taki cienki custom w powietrzu nie zajmujacy miejsca  - taka jak w kontakty
+
+
 ---
 
 
@@ -203,11 +206,6 @@ Moze szare albo mniej intensywne oddzwon odrzuc w powiadomieniach zeby mniej prz
 
 
 reszta:
-
-
-
-Suwak jak za malo miejsca na liscie polaczen, polaczen z ta osoba, wiadomosci, czytania wiadomosci - taki cienki custom w powietrzu nie zajmujacy miejsca  - taka jak w kontakty
-
 
 
 commit
@@ -255,7 +253,7 @@ pull
 
 zaawansowane:
 
-"numer nie istnieje" i zestaw standardowych komunikatow bledow, typu zly numer, zerwane polaczenie, brak czegos tam. ale to wiesz, zrob reserach z standardowym zestawem takich rzeczy idz. nie wiem jak to potem symulowac ale tylko odnotowuję
+"numer nie istnieje", numer nie odpowiada i zestaw standardowych komunikatow bledow, typu zly numer, zerwane polaczenie, brak czegos tam. ale to wiesz, zrob reserach z standardowym zestawem takich rzeczy idz. nie wiem jak to potem symulowac ale tylko odnotowuję
 
 łączenie wielu wiadomosci w jedno powiadomienie, wielo dzwonien nieodebranych z tego samego numeru w jeden
 
