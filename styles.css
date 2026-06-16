@@ -41,6 +41,24 @@
 .inbox-list::-webkit-scrollbar,
 .calls-list::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
 
+/* Cienki własny suwak „w powietrzu" — nakładkowy, NIE zajmuje miejsca w layoucie
+   (position:absolute w przewijanej liście), czysto wizualny (pointer-events:none).
+   Widoczny tylko gdy treść się nie mieści (sterowane JS-em: klasa .has-scroll). */
+.scroll-host { position: relative; }
+.scroll-thumb {
+  position: absolute;
+  right: 5px;
+  width: 5px;
+  border-radius: 3px;
+  background: rgba(60, 66, 75, 0.38);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s;
+  z-index: 5;
+}
+.scroll-host.has-scroll .scroll-thumb { opacity: 1; }
+html.dark .scroll-thumb { background: rgba(220, 226, 235, 0.34); }
+
 html, body {
   width: 100%;
   height: 100%;

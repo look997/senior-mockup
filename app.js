@@ -8,7 +8,7 @@
 // DECYZJA PROJEKTOWA: jeden wpis = jeden numer. Kontakt z androida mający kilka
 // numerów jest rozbijany na osobne wpisy z dopiskiem (np. "(komórka)" / "(dom)"),
 // zamiast wyboru numeru po wybraniu osoby. Przykład: Halina Dąbrowska poniżej.
-// Patrz FUNKCJE.md → decyzje projektowe.
+// Patrz README.md → "Jak działa?".
 const contacts = [
   { name: 'Jan Kowalski',         initials: 'JK', color: 'av-blue',   phone: '+48 601 234 567', favorite: true  },
   { name: 'Anna Nowak',           initials: 'AN', color: 'av-green',  phone: '+48 602 345 678', favorite: true  },
@@ -216,8 +216,9 @@ function ac() {
   return audioCtx;
 }
 // Pojedynczy ton o danej częstotliwości, czasie i głośności.
+// Zwraca utworzone węzły {o, g}, by dało się go natychmiast uciszyć (dzwonek).
 function tone(freq, start, dur, vol, type) {
-  const c = ac(); if (!c) return;
+  const c = ac(); if (!c) return null;
   const o = c.createOscillator(), g = c.createGain();
   o.type = type || 'sine'; o.frequency.value = freq;
   o.connect(g); g.connect(c.destination);
@@ -227,6 +228,7 @@ function tone(freq, start, dur, vol, type) {
   g.gain.setValueAtTime(vol, t + dur - 0.04);
   g.gain.linearRampToValueAtTime(0, t + dur);
   o.start(t); o.stop(t + dur + 0.02);
+  return { o, g };
 }
 // Dźwięk nowej wiadomości — krótkie "ding-dong".
 function soundMessage() {
@@ -234,21 +236,40 @@ function soundMessage() {
   tone(880, 0, 0.14, 0.25, 'sine');
   tone(660, 0.15, 0.22, 0.25, 'sine');
 }
-// Dzwonek połączenia — powtarzalna melodia; zwraca funkcję STOP.
+// Dzwonek połączenia — powtarzalna melodia. Trzymamy referencje do zaplanowanych
+// oscylatorów (ringNodes), by stopRingtone mógł URWAĆ dźwięk NATYCHMIAST
+// (samo clearInterval nie zatrzymuje już zaplanowanych przez Web Audio tonów —
+// dograłyby się do końca po odebraniu/odrzuceniu).
 let ringTimer = null;
+let ringNodes = [];
 function startRingtone() {
   if (muted) { return; }
   stopRingtone();
   const pattern = () => {
-    tone(1046, 0,    0.18, 0.22, 'triangle');
-    tone(1318, 0.2,  0.18, 0.22, 'triangle');
-    tone(1046, 0.4,  0.18, 0.22, 'triangle');
-    tone(1318, 0.6,  0.30, 0.22, 'triangle');
+    const ns = [
+      tone(1046, 0,    0.18, 0.22, 'triangle'),
+      tone(1318, 0.2,  0.18, 0.22, 'triangle'),
+      tone(1046, 0.4,  0.18, 0.22, 'triangle'),
+      tone(1318, 0.6,  0.30, 0.22, 'triangle'),
+    ];
+    ns.forEach((n) => { if (n) ringNodes.push(n); });
   };
   pattern();
   ringTimer = setInterval(pattern, 1400);
 }
-function stopRingtone() { if (ringTimer) { clearInterval(ringTimer); ringTimer = null; } }
+function stopRingtone() {
+  if (ringTimer) { clearInterval(ringTimer); ringTimer = null; }
+  // Natychmiast wycisz i zatrzymaj wszystkie zaplanowane tony dzwonka.
+  const c = audioCtx;
+  const now = c ? c.currentTime : 0;
+  ringNodes.forEach(({ o, g }) => {
+    try {
+      if (g) { g.gain.cancelScheduledValues(now); g.gain.setValueAtTime(0, now); }
+      if (o) o.stop(now);
+    } catch (e) { /* już zatrzymany — ignoruj */ }
+  });
+  ringNodes = [];
+}
 
 // ---------------- LONG-PRESS (przytrzymanie) ----------------
 // Wywołuje handler po przytrzymaniu; ustawia el.dataset.lp by zablokować klik.
@@ -302,6 +323,8 @@ function showScreen(id) {
   screens.forEach((s) => s.classList.remove('active'));
   const target = document.getElementById('screen-' + id);
   if (target) target.classList.add('active');
+  // Lista ukrytego ekranu ma wymiary 0 — przelicz kciuki suwaka po pokazaniu.
+  if (typeof updateAllScrollbars === 'function') requestAnimationFrame(updateAllScrollbars);
   buzz(15);
 }
 document.querySelectorAll('[data-target]').forEach((el) => {
@@ -405,6 +428,7 @@ function renderContacts() {
     empty.style.cssText = 'padding:36px 24px;font-size:26px;color:#6B7280;text-align:center;font-weight:700;';
     empty.textContent = 'Brak kontaktów pasujących do wyszukiwania';
     wrap.appendChild(empty);
+    refreshScrollbarById('contacts-list');
     return;
   }
   const filtering = contactFilter.trim().length > 0;
@@ -418,6 +442,7 @@ function renderContacts() {
     // Podczas filtrowania: zwykła kolejność; gwiazdka nadal oznacza ulubionego.
     list.forEach((c) => wrap.appendChild(contactCard(c, c.favorite)));
   }
+  refreshScrollbarById('contacts-list');
 }
 
 // Sekwencje multi-tap (cykl liter + cyfra) dla trybu filtra w Kontaktach.
@@ -655,7 +680,7 @@ function openConfirm(name, phone, callRef, opts) {
       confirmAvatar.hidden = true;
     }
   }
-  // Pozycja "Ostatnie połączenia z tą osobą" — ZAWSZE gdy dzwonimy do kogoś/pod numer
+  // Pozycja "Połączenia z tym numerem" — ZAWSZE gdy dzwonimy do kogoś/pod numer
   // (pusta historia pokaże "Brak wcześniejszych połączeń"); ukryta tylko dla "wpisz numer".
   historyBtn.hidden = !(confirmHistPhone || confirmHistName);
   overlay.classList.remove('hidden');
@@ -718,7 +743,7 @@ function renderContactHistory(name, phone) {
     const e = document.createElement('div');
     e.style.cssText = 'padding:40px 24px;font-size:28px;color:#6B7280;text-align:center;font-weight:700;';
     e.textContent = 'Brak wcześniejszych połączeń';
-    wrap.appendChild(e); return;
+    wrap.appendChild(e); refreshScrollbarById('contact-history-list'); return;
   }
   list.forEach(({ dir, label, time, dur }) => {
     const card = document.createElement('div');
@@ -731,6 +756,7 @@ function renderContactHistory(name, phone) {
       '<div class="call-time">' + time + '</div>';
     wrap.appendChild(card);
   });
+  refreshScrollbarById('contact-history-list');
 }
 let historyBackTarget = 'contacts';
 const historyBackBtn = document.querySelector('#screen-contact-history .keyboard-btn');
@@ -917,6 +943,7 @@ function renderInbox() {
     card.addEventListener('click', () => openMessage(messages.indexOf(m)));
     wrap.appendChild(card);
   });
+  refreshScrollbarById('inbox-list');
 }
 
 // ---------------- POJEDYNCZA WIADOMOŚĆ ----------------
@@ -984,16 +1011,17 @@ function renderCalls() {
   const fresh = calls.filter((c) => c.dir === 'missed' && !c.handled);
   const rest = calls.filter((c) => !(c.dir === 'missed' && !c.handled));
   fresh.forEach((c) => wrap.appendChild(callCard(c)));
-  // Etykieta "Wcześniejsze" pozostaje ZAWSZE, gdy są starsze połączenia —
-  // także gdy wszystkie nieodebrane są już sprawdzone (jak "Przeczytane").
+  // Etykieta "Sprawdzone" pozostaje ZAWSZE, gdy są takie połączenia — obejmuje
+  // odebrane/wykonane ORAZ nieodebrane już obejrzane (nic nie wymaga uwagi).
   if (rest.length) {
     const div = document.createElement('div');
     div.className = 'inbox-divider';
-    div.textContent = 'Wcześniejsze';
+    div.textContent = 'Sprawdzone';
     if (!fresh.length) div.classList.add('first');
     wrap.appendChild(div);
   }
   rest.forEach((c) => wrap.appendChild(callCard(c)));
+  refreshScrollbarById('calls-list');
 }
 
 // ---------------- WYCISZ (przełącza przekreślony / nieprzekreślony głośnik) ----------------
@@ -1320,6 +1348,52 @@ function openSettingsGate() {
   alert('Wrota otwarte. W pełnej aplikacji systemowej nastąpiłoby teraz przejście do natywnego ekranu telefonu / ustawień.');
 }
 
+// ---------------- CIENKI WŁASNY SUWAK (overlay, nie zajmuje miejsca) ----------------
+// Dla każdej przewijanej listy: kciuk .scroll-thumb pozycjonowany absolutnie,
+// którego rozmiar/pozycję liczymy z scrollTop/scrollHeight/clientHeight. Widoczny
+// (klasa .has-scroll) tylko gdy treść się nie mieści. Min. wysokość kciuka 40px.
+const SCROLL_LIST_IDS = ['contacts-list', 'inbox-list', 'calls-list', 'contact-history-list'];
+function updateScrollbar(list) {
+  const thumb = list._thumb;
+  if (!thumb) return;
+  const { scrollHeight, clientHeight, scrollTop } = list;
+  if (scrollHeight <= clientHeight + 1) { list.classList.remove('has-scroll'); return; }
+  list.classList.add('has-scroll');
+  const track = clientHeight;
+  const h = Math.max(40, Math.round(track * clientHeight / scrollHeight));
+  const maxTop = track - h;
+  const top = Math.round((scrollTop / (scrollHeight - clientHeight)) * maxTop);
+  thumb.style.height = h + 'px';
+  // +scrollTop, by kciuk „płynął" z widocznym obszarem (jest dzieckiem scroll-kontenera).
+  thumb.style.transform = 'translateY(' + (scrollTop + top) + 'px)';
+}
+// Dołącza kciuk jeśli go brak (render list robi innerHTML='' i go usuwa) i przelicza.
+// Rozmiar/pozycję liczymy po następnej klatce, bo świeżo wstawione karty muszą się
+// najpierw rozłożyć (scrollHeight musi być policzony).
+function refreshScrollbar(list) {
+  if (!list) return;
+  list.classList.add('scroll-host');
+  if (!list._thumb || !list.contains(list._thumb)) {
+    const thumb = document.createElement('div');
+    thumb.className = 'scroll-thumb';
+    list.appendChild(thumb);
+    list._thumb = thumb;
+    if (!list._scrollBound) {
+      list.addEventListener('scroll', () => updateScrollbar(list), { passive: true });
+      list._scrollBound = true;
+    }
+  }
+  requestAnimationFrame(() => updateScrollbar(list));
+}
+function updateAllScrollbars() {
+  SCROLL_LIST_IDS.forEach((id) => refreshScrollbar(document.getElementById(id)));
+}
+function setupScrollbars() { updateAllScrollbars(); }
+// Wywoływane z renderów list, by kciuk odtworzyć po przebudowie zawartości.
+function refreshScrollbarById(id) { refreshScrollbar(document.getElementById(id)); }
+// Po zmianie rozmiaru okna geometria list się zmienia — przelicz kciuki.
+window.addEventListener('resize', updateAllScrollbars);
+
 // ---------------- INICJALIZACJA ----------------
 // Wycisz/Odcisz TYLKO przez przytrzymanie (nie zwykły klik — by nie wyciszać przypadkiem).
 attachLongPress(muteTile, clickMute);
@@ -1327,6 +1401,7 @@ renderContacts();
 renderInbox();
 renderCalls();
 updateBadges();
+setupScrollbars();
 
 // Na starcie wrzuć istniejące nieodebrane/nieprzeczytane jako popupy do odhaczenia,
 // żeby od razu było widać panel powiadomień (najnowszy na wierzchu).

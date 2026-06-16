@@ -87,6 +87,119 @@ symulacja nie dodaje do listy polaczen glosowych/wideo/odrzuconych ale to nic w 
 no ale to jest jedno a drugie:  jest "ostatnie polaczenia z ta osoba" o ile jakies sa, a powinno to byc widoczne wlasciwie zawsze, po prostu wyswietli puste. w kontaktach tak samo
 w symulowanym pojaczeniu jak  wywolam popup potwierdzenia polaczenia to tez nie ma "ostatnio poleczenia z ta osoba"
 
+* o kurka złota! jak z powiadomienia wchodze w oddzwon i w popupie potwierdzenia wchodze w ostantie polaczenia z ta osoba, to wtedy przycisk czerwony na dole jest "Kontakty" a nie "Powiadomienia"
+
+czy moze pasowac wiwcej niz jeden w "Dopasowanie do"? Nie, bo algorytm jest ze wtedy sie wyswietli "dopasowanie do" jak tylko jeden numer spelnia ten warunek. wiec dac to do decyzji projektowej jak nie ma tam tego, bo tak juz pisalem
+
+Nie naprowiony widok blokady w trybie ciemnym - dziurka w klodce i tlo, mimo ze ten widok ma byc identyczne jak w bialym. teraz ci sie uda!
+
+Więcej niz jeden numer na kontakt? Nie, pisze wtedy nazwa 1 nazwa 2 na liscie kontaktow. daj przyklad w kontaktach. napisz w dokumentacji ze to decyzja projektowa (realnie to rozbija zwykly androidowy kontakt na dwa osobne)
+
+Decyzja projektowa ze nie ma apki aparatu wymienic w doc tez
+
+w trybie ciemnum w widoku "w trakcie rozmowy" nie widac w ikonie glosnika zmiany stanu jak sie go kliknie
+
+Odczywanie w wiadomosciach powinno usunac z powiadomienia, odczytywanie w powiadomieniach powinno usunac z powiadomienia
+
+Przerywaj nagle dzwiek jak odrzucilem lub odebralem, a nie na sie dokanczac dzwiek
+
+zamiast "WCZEŚNIEJSZE" nazwać "sprawdzone" "odbyte" "przeprowadzone i sprawdzone" no zeby byla jednoznacznosc bo teraz jest mylące
+
+doc:
+zrob screeny na nowo pod readme, ale tez zrob jak nie ma zadnych powiadomien
+
+usun dział "Uruchomienie" z readme
+
+Spis widoków (przypis do ai: to ustala kolejnosc w szczegolowych opisach widokow):
+Powiadomienia "Główny" (kafle + powiadomienia + klawiatura)
+Kontakty
+Wiadomości
+Czytanie wiadomości
+Połączenia
+Ostatnie połączenia z tą osobą
+Połączenie przychodzące
+Rozmowa (aktywne połączenie)
+Wideorozmowa (aktywne połączenie)
+Blokada ekranu
+
+w Elementy (nie żadne elementy wspolne przypis do ai)
+Pasek statusu
+Powiadomienie
+Potwierdzenie połączenia (popup)
+
+nie "Co zawiera każdy widok" tylko "Co zawierają widoki?"
+
+
+nie "Decyzje projektowe (jak i dlaczego coś działa)" tylko "Jaj działa?"
+
+nie "Funkcje (prawdziwe, działają same w sobie)" tylko dodac je do "Jak działa?"
+
+nie "Symulacje zdarzeń (sztuczne wywołanie tego, co normalnie przychodzi z zewnątrz)" tylko "Symulacje"
+
+nie "Tu chodzi wyłącznie o ręczne wywołanie zdarzeń, których w makiecie nikt z zewnątrz nie wyśle." tlyko "Sztuczne wywołanie tego, co normalnie przychodzi z zewnątrz."
+
+"Zakończone rozmowy trafiają na listę „Połączenia"" to opisz działania funkcji a nie symulacji
+
+usuń nagłówek "Szczegóły symulacji:" i dolacz punkty do "Symulacje"
+
+funkcje.md nie powinno istniec bo bylu juz przeniesione do readme
+
+Suwak jak za malo miejsca na liscie kontaktow, polaczen, polaczen z ta osoba, wiadomosci - taki cienki custom w powietrzu nie zajmujacy miejsca
+
+"Ostatnie połączenia z tą osobą" zamień na "Połączenia z tym numerem"
+
+w kontakty przycisk czerwony na dole to "Bez klawiatury", a jak ja nacisniesz to znika klawiatura z widoku kontakty i sam czerwony przycisk zamienia sie w standardowe "[]Powiadomienia". daje to wiecej miejsca, mimo ze domyslnie wyswietla klaw zeby filtrowac
+
+
 ---
 
 moze inspo dotychczasowymi aplikacjami zeby ulepszyc wyglad
+
+Pod themey wystawic zmienne css z kolorami, ramkami, ikonkami i moze margin padding
+
+moze powinny byc polaczenia po prawej a wiadomosci po prawej, nie wiem, raczej nie ale kto wie? co wygodniej?
+
+Brak w klawiaturze spacji na kontaktach i plusa na ekranie glownym. Działających. Gwiazdka kratka tez brak
+
+
+w powiadomieniu "Dopasowanie do" brakuje przycisku "Zadzwoń" i "Odrzuć", a odrzuć wyłącznie czysciłoby caly wpisany numer na raz
+Regres ze nie ma "+x wiecej" gdy powiadomienie "dopasowania do numeru", o liczbie wiadomosci i poloczen
+
+chyba nie powinny tak latwo krawedzie po bokach sie klikac? bo ja przez przypadek dotykam
+
+Dodac takie ciut ciut opoznienie dxialania kazdego przycisku, zeby zmniejszyc szanse przypadkowego wcisniecia
+
+Lagodne ramki zamiast ostrych ramek przyciskow (łagodne jak odczytane wiadomosci, sprawdzone polaczenia) - na kafelkach, na klawiaturze, kontakty w kontaktach a wpisz numer/ wpisz aby wyszukac calkiem bez ramki, separator statusu tez telikatny
+
+Moze szare albo mniej intensywne oddzwon odrzuc w powiadomieniach zeby mniej przytlaczac? ale najpierw te ramki na cienie, moze to zmniejszy przytoczenie wystarczajaco
+
+
+sym i nie tylko:
+w czytanie wiadomosci pokazuj cala konwersacje, wyslane wiadomosci tez. i zasymuluj taka rozmowe z konwersacja obustronna (w apce nie ma funkcji pisania ale odczytanie napisanych jak najbardziej moze być)
+
+do symulacji dodaj widomosc z dlugim tekstem wymagajacym przewijania
+
+Brak symulacji nieodebranej wideo rozmowy. Moze dodac ze w symulscji przycisnij kafelek poloczen czasem sie twozy nieodebrane wideo polaczenie a nie tylko zwykle polaczenia
+
+
+drobne:
+brakuje oznaczenia w polaczeniach wideo rozmowy, pewnie w powiadomieniu o nieodebaranym też (aczkolwiek nie wiem czy na smartfonach jest to wyroznione ale pewnie jest ale sprawdz)
+
+"Dopasowano do wpisywanego numeru" zamien na ??
+
+bugi:
+
+Nadal nie naprawione ze jak powrot do glownego widoku to mruga pole numeru a nie ma wtedy mnugac. tym razem ci sie uda? to mruganeie tylko jak klikniesz zielone zadzwon na ekranie glownym a jest puste wpisz numer
+
+
+zaawansowane:
+
+"numer nie istnieje" i zestaw standardowych komunikatow bledow, typu zly numer, zerwane polaczenie, brak czegos tam. ale to wiesz, zrob reserach z standardowym zestawem takich rzeczy idz. nie wiem jak to potem symulowac ale tylko odnotowuję
+
+łączenie wielu wiadomosci w jedno powiadomienie, wielo dzwonien nieodebranych z tego samego numeru w jeden
+
+Zawies rozmowe dwie rozmowy na raz - dodatkowy widok?
+
+* nowy projekt, tym razem natywna apka ktora robi to wszystko (znaczy ui tylko jeden do jeden), a nastepny krok podstawic tam faktyczne dane i funkcje. laucher (lekki) monolit, ma w sobie uprawnienia do: powiadomienia, wiadomosci, polaczenia, kontakty
+
+* patrzenie na ekran glowny w trakcie rozmowy - wtedy rozmowa ktora jest w trakcie w miejscu powiedomienia

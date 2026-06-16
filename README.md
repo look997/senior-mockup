@@ -3,7 +3,7 @@
 > **▶️ Wersja na żywo:** **https://look997.github.io/senior-mockup/**
 > Otwórz na telefonie i dodaj do ekranu głównego, by uruchomić na pełnym ekranie.
 
-Makieta prostego launchera dla osoby starszej, działająca jako **aplikacja webowa (PWA)** na pełnym ekranie telefonu. Zbiera inspiracje (BIG Launcher, Doro, Jitterbug, Samsung Easy Mode, Key/T9 Launcher) w jeden spójny, „wysepkowy" projekt. Styl: jasna baza, wysoki kontrast, taktylne „fizyczne klawisze", kolorowe akcenty funkcyjne (zielony = zadzwoń, czerwony = nieodebrane/usuń, niebieski = wiadomości). Obsługa wyłącznie przez dotknięcia dużych przycisków; kilka funkcji przez dłuższe przytrzymanie, a połączenie przychodzące i blokadę — przez przeciągnięcie.
+Makieta prostego launchera dla osoby starszej, działająca jako **aplikacja webowa (PWA)** na pełnym ekranie telefonu. Zbiera inspiracje (BIG Launcher, Doro, Jitterbug, Samsung Easy Mode, Key/T9 Launcher) w jeden spójny, „wysepkowy" projekt. Styl: jasna baza, wysoki kontrast, taktylne „fizyczne klawisze", kolorowe akcenty funkcyjne (zielony = zadzwoń, czerwony = nieodebrane/usuń, niebieski = wiadomości). Obsługa wyłącznie przez dotknięcia dużych przycisków; kilka funkcji przez dłuższe przytrzymanie, a połączenie przychodzące i blokadę — przez przeciągnięcie. Brak klasycznych gestów poza przewijaniem długich list.
 
 Czysty **vanilla HTML/CSS/JS**, bez frameworków i zależności.
 
@@ -15,36 +15,13 @@ Czysty **vanilla HTML/CSS/JS**, bez frameworków i zależności.
 
 ## Galeria
 
-| Ekran główny | Kontakty | Wiadomości |
+| Główny | Kontakty | Wiadomości |
 |:---:|:---:|:---:|
-| ![Ekran główny](screenshots/01-home.png) | ![Kontakty](screenshots/02-kontakty.png) | ![Wiadomości](screenshots/03-wiadomosci.png) |
+| ![Główny](screenshots/01-home.png) | ![Kontakty](screenshots/02-kontakty.png) | ![Wiadomości](screenshots/03-wiadomosci.png) |
 | **Czytanie wiadomości** | **Połączenia** | **Połączenie przychodzące** |
-| ![Czytanie wiadomości](screenshots/04-wiadomosc.png) | ![Połączenia](screenshots/05-polaczenia.png) | ![Połączenie przychodzące](screenshots/06-przychodzace.png) |
+| ![Czytanie wiadomości](screenshots/04-wiadomosc.png) | ![Połączenia](screenshots/05-polaczenia.png) | ![Przychodzące](screenshots/06-przychodzace.png) |
 | **Rozmowa** | **Potwierdzenie dzwonienia** | **Tryb ciemny** |
 | ![Rozmowa](screenshots/07-rozmowa.png) | ![Potwierdzenie](screenshots/08-potwierdzenie.png) | ![Tryb ciemny](screenshots/09-ciemny.png) |
-
-## Uruchomienie
-
-### Online (najprościej)
-
-Otwórz **https://look997.github.io/senior-mockup/** w przeglądarce telefonu. W Chrome: **menu (⋮) → „Dodaj do ekranu głównego"** — uruchomiona z ikony aplikacja startuje w trybie `fullscreen` (bez paska adresu i systemowego paska statusu — rysujemy własny).
-
-### Lokalnie / na telefonie przez `adb`
-
-Wymagane: Node 20+, `adb`, telefon podłączony (USB lub WiFi `adb connect IP:5555`).
-
-```bash
-# 1. Uruchom serwer (port 8080)
-node serve.js
-
-# 2. W drugim terminalu: tunel + otwórz Chrome na telefonie
-./deploy.sh
-# (dla konkretnego urządzenia: DEVICE=192.168.1.42:5555 ./deploy.sh)
-```
-
-`deploy.sh` robi `adb reverse tcp:8080 tcp:8080` i otwiera `http://localhost:8080` w Chrome na telefonie. `localhost` jest traktowany jako bezpieczny kontekst, więc PWA i service worker działają bez HTTPS.
-
-Regeneracja ikon PWA: `node gen-icons.js`.
 
 ---
 
@@ -54,21 +31,20 @@ Makieta prostego launchera dla osoby starszej, działająca jako aplikacja webow
 
 ## Spis widoków
 
-- Ekran powiadomień (główny: klawiatura + kafle)
+- Powiadomienia „Główny" (kafle + powiadomienia + klawiatura)
 - Kontakty
-- Wiadomości (skrzynka)
+- Wiadomości
 - Czytanie wiadomości
 - Połączenia
-- Ostatnie połączenia z kontaktem
-- Potwierdzenie połączenia
-- Rozmowa (aktywne połączenie)
-- Wideorozmowa
+- Połączenia z tym numerem
 - Połączenie przychodzące
+- Rozmowa (aktywne połączenie)
+- Wideorozmowa (aktywne połączenie)
 - Blokada ekranu
 
 ---
 
-## Elementy wspólne (obecne na wielu widokach, nie są widokami)
+## Elementy
 
 ### Pasek statusu
 Stały, na górze każdego widoku.
@@ -77,25 +53,25 @@ Stały, na górze każdego widoku.
 - Duży zegar (lewo) i duża data w skróconym formacie, np. „Wt, 16 czerwca" (prawo).
 - Bateria czerwienieje poniżej 20%.
 
-### Powiadomienia
+### Powiadomienie
 Panel pojawiający się nad klawiaturą na ekranie głównym.
 - Pokazuje najnowsze powiadomienie na wierzchu; licznik „+N więcej" gdy czeka więcej.
 - Wiadomość: nadawca, godzina, zajawka, przyciski **CZYTAJ** / **Przeczytane**.
 - Nieodebrane połączenie: nazwa, numer, godzina, przyciski **ODDZWOŃ** / **Odrzuć**.
 - Powiadomienia nie znikają same — dopiero reakcja pokazuje następne (przeglądanie po kolei).
-- Współgra z podpowiedzią dopasowania numeru (opis w decyzjach projektowych).
+- Współgra z podpowiedzią dopasowania numeru (opis w „Jak działa?").
 
-### Popup potwierdzenia dzwonienia
+### Potwierdzenie połączenia (popup)
 Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
-- Duża nazwa i duży numer rozmówcy.
-- Przyciski: zielony **Tak, zadzwoń**, niebieski **Zrób wideorozmowę**, **Ostatnie połączenia z tą osobą** (zawsze dostępne — pusta historia pokaże komunikat; delikatny styl), **Nie dzwoń**.
+- Awatar, duża nazwa i duży numer rozmówcy.
+- Przyciski: zielony **Tak, zadzwoń**, niebieski **Zrób wideorozmowę**, **Połączenia z tym numerem** (zawsze dostępne — pusta historia pokaże komunikat; delikatny styl), **Nie dzwoń**.
 - Zamykają je tylko przyciski (nie kliknięcie w tło). „Nie dzwoń" oznacza nieodebrane jako obejrzane.
 
 ---
 
-## Co zawiera każdy widok
+## Co zawierają widoki?
 
-### Ekran powiadomień (główny)
+### Powiadomienia „Główny" (kafle + powiadomienia + klawiatura)
 - Cztery kafle 2×2: **Wycisz**, **Kontakty**, **Połączenia**, **Wiadomości**.
 - Kafle Połączenia i Wiadomości mają w rogu czerwony znacznik z liczbą nowych zdarzeń.
 - Panel powiadomień nad klawiaturą (element wspólny, opis wyżej).
@@ -112,9 +88,9 @@ Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 - W nazwach na liście **pasujące litery są wyróżnione innym odcieniem** (zielony akcent, bez pogrubienia) — widać, która część nazwy odpowiada wpisanemu ciągowi.
 - Jeden czerwony przycisk: **Powiadomienia** (pole puste, wraca na główny) / **Usuń** (po wpisaniu).
 
-### Wiadomości (skrzynka)
+### Wiadomości
 - Tytuł „Wiadomości" (bez cofania).
-- Lista kart: nadawca, podgląd, data i godzina (np. „16 cze, 14:05").
+- Lista kart: awatar, nadawca, podgląd, data i godzina (np. „16 cze, 14:05").
 - **Nieprzeczytane na górze** (niebieski obrys + znacznik), pod nimi etykieta „Przeczytane" i reszta.
 - MMS oznaczony etykietą „[MMS]" (niebieska gdy nieprzeczytane, szara po przeczytaniu).
 - Czerwony przycisk **Powiadomienia** na dole.
@@ -129,44 +105,54 @@ Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 - Tytuł „Połączenia" (bez cofania).
 - Lista: ikona kierunku, nazwa, opis i — w jednym rzędzie — czas trwania, np. „Odebrane · 5 min 23 s"; po prawej data i godzina.
 - Kodowanie potrójne: kolor, kształt strzałki, słowo (nieodebrane czerwone, odebrane zielone, wykonane niebieskie).
-- **Nieobejrzane nieodebrane na górze**, pod nimi etykieta „Wcześniejsze" i reszta.
+- **Nieobejrzane nieodebrane na górze**, pod nimi etykieta „Sprawdzone" (odebrane/wykonane oraz nieodebrane już obejrzane).
 - Czerwony przycisk **Powiadomienia** na dole.
 
-### Ostatnie połączenia z kontaktem
-- Historia połączeń z jedną osobą, w stylu listy połączeń, z dokładnymi datami i czasem trwania.
+### Połączenia z tym numerem
+- Historia połączeń z danym numerem, w stylu listy połączeń, z dokładnymi datami i czasem trwania.
 - Łączy świeże połączenia (z bieżącej sesji, w tym symulowane) z wcześniejszą historią; najnowsze na górze.
-- Dla osoby/numeru bez żadnych połączeń pokazuje „Brak wcześniejszych połączeń".
+- Dla numeru bez żadnych połączeń pokazuje „Brak wcześniejszych połączeń".
 - Dolny przycisk wraca do źródła: **Kontakty**, **Połączenia** albo **Wiadomość** (zależnie skąd otwarto).
-
-### Potwierdzenie połączenia
-- Widok-nakładka opisany w „Elementy wspólne → Popup potwierdzenia dzwonienia".
-
-### Rozmowa (aktywne połączenie)
-- Awatar, nazwa i numer rozmówcy, status, licznik czasu.
-- Przełączniki: **Głośnik**, **Wideo**.
-- Duży czerwony **Rozłącz**.
-
-### Wideorozmowa
-- Obszar obrazu rozmówcy (placeholder), mały podgląd „Ty", numer i licznik czasu.
-- Przyciski: **Tylko głos**, **Rozłącz**.
 
 ### Połączenie przychodzące
 - Nagłówek „Połączenie przychodzące" lub „Wideorozmowa przychodząca".
 - Pulsujący awatar, nazwa, numer, dzwonek w tle.
 - Przeciągane w górę: **Odbierz** (ikona kamery przy wideorozmowie), **Odbierz tylko głosowo** (przy wideorozmowie), **Odrzuć**.
 
+### Rozmowa (aktywne połączenie)
+- Awatar, nazwa i numer rozmówcy, status, licznik czasu.
+- Przełączniki: **Głośnik**, **Wideo**.
+- Duży czerwony **Rozłącz**.
+
+### Wideorozmowa (aktywne połączenie)
+- Obszar obrazu rozmówcy (placeholder), mały podgląd „Ty", numer i licznik czasu.
+- Przyciski: **Tylko głos**, **Rozłącz**.
+
 ### Blokada ekranu
 - Kłódka, animowana strzałka, napis „Przeciągnij w górę, aby odblokować".
 - Godzina i data tylko na pasku statusu.
-- W trybie ciemnym tło ekranu i paska statusu są tym samym ciemnym kolorem (bez szwu).
+- W trybie ciemnym wygląda identycznie jak w jasnym (sam jest ciemny) — tło ekranu i paska statusu są tym samym ciemnym kolorem (bez szwu).
 
 ---
 
-## Decyzje projektowe (jak i dlaczego coś działa)
+## Jak działa?
+
+### Funkcje (prawdziwe, działają same w sobie)
+Te funkcje działają realnie w makiecie (część efektu fizycznego — jak zapalenie diody latarki czy wyjście do systemu — leży poza możliwościami aplikacji webowej; wzmianki o tym w „Symulacje").
+
+- **Latarka** — przytrzymaj klawisz **0** na klawiaturze. Włącza/wyłącza; ikona latarki na klawiszu się podświetla.
+- **Wyciszenie / odciszenie** — przytrzymaj kafel **Wycisz** (napis zmienia się na „Odcisz"); blokuje wibracje i dźwięki.
+- **Tryb ciemny** — przytrzymaj strefę **zasięgu** (lewa strona oczka). Przełącza jasny/ciemny motyw.
+- **Zablokowanie ekranu** — przytrzymaj czerwony przycisk **Zablokuj** przy pustym polu numeru.
+- **Odblokowanie** — **przeciągnij** ekran blokady w górę (kłódka jedzie za palcem); odpowiednik czytnika odcisku.
+- **Szybkie wybieranie ulubionych** — przytrzymaj klawisz **1, 2, 3…**, dzwoni kolejno do ulubionych z listy.
+- **Sekretne wrota do natywnego ekranu telefonu** — przytrzymaj strefę baterii (bzyk), a potem w kilka sekund strefę zasięgu (bzyk).
+- **Zakończone rozmowy trafiają na listę „Połączenia"** — każda rozmowa dopisuje się do historii po zakończeniu: wychodząca jako „Wykonane" (z czasem trwania), odebrana przychodząca jako „Odebrane", a odrzucona przychodząca jako „Nieodebrane". Pojawiają się też w „Ostatnich połączeniach z tą osobą".
 
 ### Powiadomienia jako kolejka do przeglądania
 - W danym momencie widać jedno powiadomienie; nie znika samo, dopiero reakcja pokazuje następne.
 - Wejście w wiadomość przez „CZYTAJ" i naciśnięcie „Przeczytane" w pełnym widoku wraca **do następnego powiadomienia**, nie do listy.
+- Przeczytanie wiadomości — z panelu powiadomień albo z listy Wiadomości — zawsze zdejmuje ją z powiadomień.
 
 ### Podpowiedź dopasowania numeru a powiadomienia
 - Gdy wpisywany numer pasuje do **dokładnie jednego** kontaktu, w obszarze powiadomień pojawia się „Dopasowano do wpisywanego numeru" — **zamiast** powiadomień. W pokazanym numerze **cyfry zgodne z tym, co wpisałeś, są wyróżnione innym odcieniem** (zielony akcent, bez pogrubienia).
@@ -199,13 +185,16 @@ Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 - Odbierane połączenie łączy się od razu.
 - Odebranie wideorozmowy daje wybór: wideo albo tylko głos.
 
+### Awatary
+- Awatar (inicjały + kolor) jest wszędzie, gdzie identyfikuje osobę: na liście kontaktów, na liście i w widoku wiadomości, w powiadomieniach i w popupie potwierdzenia. Numer spoza kontaktów dostaje szary awatar „?".
+
 ### Tryb ciemny i dostępność
 - Pełny motyw ciemny: ciemne tła i karty, jasny tekst, rozjaśnione kolory funkcyjne, ciemniejszy niebieski kafel Wiadomości z białą ikoną, zmiękczone obrysy.
 - Duże cele dotykowe, wysoki kontrast, brak gestów poza przeciąganiem tam, gdzie naśladuje telefon (odbieranie, odblokowanie).
 
 ### Dźwięki i wibracje
 - Krótka wibracja przy dotknięciach (o ile nie wyciszono).
-- Dźwięk nowej wiadomości i dzwonek połączenia generowane programowo; dzwonek milknie po odebraniu, odrzuceniu lub opuszczeniu ekranu połączenia przychodzącego.
+- Dźwięk nowej wiadomości i dzwonek połączenia generowane programowo; dzwonek **urywa się natychmiast** po odebraniu, odrzuceniu lub opuszczeniu ekranu połączenia przychodzącego (bez dograwania bieżącego tonu).
 
 ### Świadome ograniczenia zakresu (czego celowo nie ma i dlaczego)
 Nakładka ma być maksymalnie prosta dla seniora i **nie wypuszczać go poza siebie**. Dlatego świadomie pominięto:
@@ -221,32 +210,15 @@ Nakładka ma być maksymalnie prosta dla seniora i **nie wypuszczać go poza sie
 
 ---
 
-## Funkcje (prawdziwe, działają same w sobie)
+## Symulacje
 
-Te funkcje działają realnie w makiecie (część efektu fizycznego — jak zapalenie diody latarki czy wyjście do systemu — leży poza możliwościami aplikacji webowej; wzmianki o tym w sekcji symulacji).
-
-- **Latarka** — przytrzymaj klawisz **0** na klawiaturze. Włącza/wyłącza; ikona latarki na klawiszu się podświetla.
-- **Wyciszenie / odciszenie** — przytrzymaj kafel **Wycisz** (napis zmienia się na „Odcisz"); blokuje wibracje i dźwięki.
-- **Tryb ciemny** — przytrzymaj strefę **zasięgu** (lewa strona oczka). Przełącza jasny/ciemny motyw.
-- **Zablokowanie ekranu** — przytrzymaj czerwony przycisk **Zablokuj** przy pustym polu numeru.
-- **Odblokowanie** — **przeciągnij** ekran blokady w górę (kłódka jedzie za palcem); odpowiednik czytnika odcisku.
-- **Szybkie wybieranie ulubionych** — przytrzymaj klawisz **1, 2, 3…**, dzwoni kolejno do ulubionych z listy.
-- **Sekretne wrota do natywnego ekranu telefonu** — przytrzymaj strefę baterii (bzyk), a potem w kilka sekund strefę zasięgu (bzyk).
-
----
-
-## Symulacje zdarzeń (sztuczne wywołanie tego, co normalnie przychodzi z zewnątrz)
-
-Tu chodzi wyłącznie o ręczne wywołanie zdarzeń, których w makiecie nikt z zewnątrz nie wyśle.
+Sztuczne wywołanie tego, co normalnie przychodzi z zewnątrz.
 
 - **Połączenie przychodzące — głosowe** (Połączenie przychodzące) — przytrzymaj przycisk **Zadzwoń** na ekranie głównym.
 - **Połączenie przychodzące — wideo** (Połączenie przychodzące → Wideorozmowa) — przytrzymaj kafel **Kontakty**.
 - **Nowa wiadomość** (Wiadomości, Powiadomienia) — przytrzymaj kafel **Wiadomości**. Dodaje nowy wpis na górę skrzynki, pokazuje powiadomienie i gra dźwięk.
 - **Nowe nieodebrane połączenie** (Połączenia, Powiadomienia) — przytrzymaj kafel **Połączenia**. Dodaje nowe nieodebrane na górę listy i powiadomienie.
 - **Pomarańczowa kropka powiadomień ogólnych** (Pasek statusu) — przytrzymaj strefę **baterii** (prawa strona oczka); ponowne przytrzymanie ją gasi.
-
-Szczegóły symulacji:
-- **Zakończone rozmowy trafiają na listę „Połączenia"** — każda rozmowa dopisuje się do historii po zakończeniu: wychodząca jako „Wykonane" (z czasem trwania), odebrana przychodząca jako „Odebrane", a odrzucona przychodząca jako „Nieodebrane". Pojawiają się też w „Ostatnich połączeniach z tą osobą".
 - **Powiadomienia startowe** — po uruchomieniu w kolejce powiadomień są już domyślne nieprzeczytane wiadomości i nieodebrane połączenia (znaczniki z liczbą na kaflach pokazują ich liczbę). Stanowią punkt wyjścia do przeglądania.
 - **Faza nawiązywania ~2 s** — przy połączeniu wychodzącym przez około dwie sekundy widać status „Nawiązywanie połączenia…", po czym status zmienia się na „Trwa połączenie" i rusza licznik. To symulacja czasu zestawiania.
 - **Ograniczenia środowiska** — efekty fizyczne prawdziwych funkcji nie zachodzą w aplikacji webowej: latarka nie zapala realnie diody, wyciszenie nie ucisza systemowego dzwonka, sekretne wrota nie przenoszą faktycznie do natywnego launchera, a obraz wideorozmowy jest placeholderem. Same funkcje są jednak prawdziwe i ich logika działa.
@@ -265,4 +237,3 @@ Szczegóły symulacji:
 | `gen-icons.js` | generuje ikony PNG bez zależności |
 | `serve.js` | serwer statyczny (no-cache, Service-Worker-Allowed) |
 | `deploy.sh` | adb reverse + otwarcie Chrome na telefonie |
-| `FUNKCJE.md` | pełna dokumentacja funkcji (źródło sekcji powyżej) |
