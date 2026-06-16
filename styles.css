@@ -246,8 +246,9 @@ main {
   font-size: 32px; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
 }
-/* Na ciemnym kaflu (Wiadomości) obwódka dla kontrastu */
-.tile-messages .corner-badge { box-shadow: 0 0 0 4px var(--surface); }
+/* Badge na kaflu Wiadomości — niebieski (akcent motywu wiadomości);
+   na Połączeniach zostaje #AB4848. Obwódka w kolorze tła kafla dla odcięcia. */
+.tile-messages .corner-badge { background: var(--blue); box-shadow: 0 0 0 4px var(--surface); }
 .tile-calls .corner-badge { box-shadow: 0 0 0 4px var(--surface); }
 .corner-badge[hidden] { display: none; }
 
