@@ -198,31 +198,6 @@ wszystkie wiadomosci od jednego numeru musza sie wyswietlac w widoku wiadomosci 
 
 przycisk pokaz klaw dialer w trakcie trwajacej rozmowy. zielone Klawiatura ze strzałką w górę obok (z lewej strony) czerwonego klawisza rozłącz
 
-
----
-
-moze inspo dotychczasowymi aplikacjami zeby ulepszyc wyglad
-
-moze powinny byc polaczenia po prawej a wiadomosci po prawej, nie wiem, raczej nie ale kto wie? co wygodniej?
-
-chyba nie powinny tak latwo krawedzie po bokach sie klikac? bo ja przez przypadek dotykam
-
-Moze szare albo mniej intensywne oddzwon odrzuc w powiadomieniach zeby mniej przytlaczac? ale najpierw te ramki na cienie, moze to zmniejszy przytoczenie wystarczajaco
-
-
-zaawansowane:
-
-"numer nie istnieje", numer nie odpowiada i zestaw standardowych komunikatow bledow, typu zly numer, zerwane polaczenie, brak czegos tam. ale to wiesz, zrob reserach z standardowym zestawem takich rzeczy idz. nie wiem jak to potem symulowac ale tylko odnotowuję
-
-Zawies rozmowe dwie rozmowy na raz - dodatkowy widok?
-
-patrzenie na ekran glowny w trakcie rozmowy - wtedy rozmowa ktora jest w trakcie w miejscu powiedomienia. po co? moze zeby wtedy wejsc w wiadomosci albo inny widok? w trakcie i cos sprawdzic
-
-Pod themesy wystawic zmienne css z kolorami, ramkami, ikonkami i moze margin padding
-
-nowy projekt, tym razem natywna apka ktora robi to wszystko (znaczy ui tylko jeden do jeden), a nastepny krok podstawic tam faktyczne dane i funkcje. laucher (lekki) monolit, ma w sobie uprawnienia do: powiadomienia, wiadomosci, polaczenia, kontakty
-
-
 readme doc dokonczyc:
 zrob screeny na nowo pod readme, ale tez zrob jak nie ma zadnych powiadomien
 
@@ -265,3 +240,29 @@ sprawdz funkcje apki ze screenow i kodu i commitow i rozmowy i wywnioskuj i zapy
 commit
 
 pull
+
+---
+
+moze inspo dotychczasowymi aplikacjami zeby ulepszyc wyglad
+
+moze powinny byc polaczenia po prawej a wiadomosci po prawej, nie wiem, raczej nie ale kto wie? co wygodniej?
+
+chyba nie powinny tak latwo krawedzie po bokach sie klikac? bo ja przez przypadek dotykam
+
+Moze szare albo mniej intensywne oddzwon odrzuc w powiadomieniach zeby mniej przytlaczac? ale najpierw te ramki na cienie, moze to zmniejszy przytoczenie wystarczajaco
+
+zrob commit i "bug: w dark theme, znaczek na oddzwon/czytaj ma bialy napis na bialym znaczku, wiec nie odczyta nikt. w dark theme napis na znaczku musi byc czarny
+
+MMS to tez cesc konwersacji? tak to zrobiles? wtedy [MMS] to tylko znaczek dotyczacy konkretnej ostatniej wiadomosci albo jednej z wiadomosci nieodczytanych z tego numeru...
+
+zaawansowane:
+
+"numer nie istnieje", numer nie odpowiada i zestaw standardowych komunikatow bledow, typu zly numer, zerwane polaczenie, brak czegos tam. ale to wiesz, zrob reserach z standardowym zestawem takich rzeczy idz. nie wiem jak to potem symulowac ale tylko odnotowuję
+
+Zawies rozmowe dwie rozmowy na raz - dodatkowy widok?
+
+patrzenie na ekran glowny w trakcie rozmowy - wtedy rozmowa ktora jest w trakcie w miejscu powiedomienia. po co? moze zeby wtedy wejsc w wiadomosci albo inny widok? w trakcie i cos sprawdzic
+
+Pod themesy wystawic zmienne css z kolorami, ramkami, ikonkami i moze margin padding
+
+nowy projekt, tym razem natywna apka ktora robi to wszystko (znaczy ui tylko jeden do jeden), a nastepny krok podstawic tam faktyczne dane i funkcje. laucher (lekki) monolit, ma w sobie uprawnienia do: powiadomienia, wiadomosci, polaczenia, kontakty

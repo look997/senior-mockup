@@ -623,21 +623,28 @@ document.querySelectorAll('.dialer').forEach((dialer) => {
 
   const call = dialer.querySelector('[data-role="call"]');
   const numField = dialer.querySelector('.num-field');
-  // Akcję wiążemy z pointerdown rozpoczętym NA przycisku — to eliminuje
-  // "ghost-click", który po zmianie ekranu (np. powrót Klawiaturą) trafiałby
-  // w Zadzwoń. Ghost-click to tylko 'click' bez własnego 'pointerdown'.
-  let callArmed = false;
+  // KLUCZOWE: po zakończeniu animacji ZDEJMIJ klasę 'flash'. Bez tego klasa
+  // zostaje na elemencie na zawsze, a animacja CSS odpala się PONOWNIE przy
+  // każdym pokazaniu ekranu (powrót na HOME re-renderuje pole) — stąd "miganie
+  // przy różnych drogach powrotu, ale dopiero PO pierwszym legalnym flashu".
+  numField.addEventListener('animationend', () => numField.classList.remove('flash'));
+  // Akcja Zadzwoń wymaga PEŁNEGO gestu rozpoczętego NA tym przycisku JUŻ na HOME:
+  // pointerdown ORAZ click muszą paść na Zadzwoń, a pointerdown musi być NOWSZY
+  // niż ostatnia zmiana ekranu. Ghost-click po powrocie (przycisk powrotu leży
+  // tam, gdzie Zadzwoń) rozpoczął swój pointerdown na POPRZEDNIM ekranie — więc
+  // pointerdownAt < lastScreenChangeAt i nigdy nie przejdzie. To deterministyczne
+  // (nie zależy od progu czasowego) — flash leci tylko przy świadomym kliknięciu.
+  let callPointerDownAt = -1;
   if (call) {
-    call.addEventListener('pointerdown', () => { callArmed = true; });
+    call.addEventListener('pointerdown', () => { callPointerDownAt = Date.now(); });
     call.addEventListener('click', () => {
-      if (call.dataset.lp === '1') { call.dataset.lp = '0'; callArmed = false; return; }
-      if (!callArmed) return;          // klik bez pointerdown na tym przycisku → ignoruj
-      callArmed = false;
+      const downAt = callPointerDownAt;
+      callPointerDownAt = -1;          // zużyj — każdy click konsumuje swój pointerdown
+      if (call.dataset.lp === '1') { call.dataset.lp = '0'; return; }
+      // Gest świeży tylko, gdy pointerdown padł na ten przycisk PO zmianie ekranu.
+      if (downAt < lastScreenChangeAt) return;   // ghost-click / klik tuż po nawigacji
       if (mode !== 'phone') return;
       if (!value) {
-        // Ghost-click po powrocie na HOME (przycisk powrotu leży tam gdzie Zadzwoń):
-        // nie migaj polem, jeśli kliknięcie nastąpiło tuż po zmianie ekranu.
-        if (Date.now() - lastScreenChangeAt < 400) return;
         numField.classList.remove('flash');
         void numField.offsetWidth;     // restart animacji
         numField.classList.add('flash');
@@ -945,6 +952,7 @@ function startCall(name, opts) {
   incallAvatar.textContent = initialsFor(name);
   callSeconds = 0; incallTimer.textContent = '00:00';
   speakerOn = false; speakerBtn.classList.remove('on');
+  if (typeof resetIncallDialpad === 'function') resetIncallDialpad();   // klawiatura tonowa: schowana na start
 
   function connected() {
     incallStatus.textContent = 'Trwa połączenie';
@@ -981,6 +989,7 @@ function endCall() {
     logCall({ name: currentCallName, phone: phoneOfName(currentCallName), dir: currentCallDir, dur: callSeconds });
     currentCallName = null;
   }
+  if (typeof resetIncallDialpad === 'function') resetIncallDialpad();   // schowaj/wyczyść klawiaturę tonową
   buzz(30);
   showScreen(screenBeforeCall || 'home');
 }
@@ -998,6 +1007,41 @@ function goAudio() { showScreen('incall'); buzz(15); }
 
 // Oba przyciski Rozłącz (rozmowa głosowa i wideo).
 document.querySelectorAll('[data-role="hangup"]').forEach((b) => b.addEventListener('click', endCall));
+
+// ---------------- KLAWIATURA TONOWA W ROZMOWIE ----------------
+// Przycisk "Klaw." wysuwa klawiaturę 0-9 *# w trakcie rozmowy; wybierane cyfry
+// pojawiają się na wyświetlaczu (jak wybieranie tonowe w menu IVR). Licznik leci dalej.
+const incallScreen = document.getElementById('screen-incall');
+const incallDialpad = document.getElementById('incall-dialpad');
+const incallDialDisplay = document.getElementById('incall-dial-display');
+const incallKbdBtn = document.getElementById('incall-kbd-btn');
+const incallKbdArrow = document.getElementById('incall-kbd-arrow');
+const incallKeypadEl = incallScreen.querySelector('[data-role="incall-keypad"]');
+let incallDialValue = '';
+buildKeypad(incallKeypadEl);   // klawisze 0-9 *#
+// Reset: schowaj klawiaturę i wyczyść wpisane cyfry (na start/koniec rozmowy).
+function resetIncallDialpad() {
+  incallDialValue = '';
+  incallDialDisplay.textContent = '';
+  incallDialpad.classList.add('dialpad-hidden');
+  if (incallKbdArrow) incallKbdArrow.textContent = '▲';   // strzałka w górę = pokaż
+}
+resetIncallDialpad();
+incallKbdBtn.addEventListener('click', () => {
+  const hidden = incallDialpad.classList.toggle('dialpad-hidden');
+  if (incallKbdArrow) incallKbdArrow.textContent = hidden ? '▲' : '▼';  // ▼ gdy widoczna
+  buzz(15);
+});
+// Klik klawisza w rozmowie — dopisz znak na wyświetlacz + krótki ton DTMF-ish.
+incallKeypadEl.addEventListener('click', (e) => {
+  const key = e.target.closest('.key');
+  if (!key) return;
+  if (incallDialValue.length >= 20) return;
+  incallDialValue += key.dataset.digit;
+  incallDialDisplay.textContent = incallDialValue;
+  tone(880, 0, 0.12, 0.18, 'sine');   // krótki ton wybierania
+  buzz(12);
+});
 // Głośnomówiący — toggle.
 speakerBtn.addEventListener('click', () => {
   speakerOn = !speakerOn;
