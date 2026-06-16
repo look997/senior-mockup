@@ -119,7 +119,8 @@ Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 - Wejście w wiadomość przez „CZYTAJ" i naciśnięcie „Przeczytane" w pełnym widoku wraca **do następnego powiadomienia**, nie do listy.
 
 ### Podpowiedź dopasowania numeru a powiadomienia
-- Gdy wpisujesz numer pasujący do jednego kontaktu, w obszarze powiadomień pojawia się „Dopasowano do wpisywanego numeru" — **zamiast** powiadomień. W pokazanym numerze **cyfry zgodne z tym, co wpisałeś, są wyróżnione innym odcieniem** (zielony akcent, bez pogrubienia).
+- Gdy wpisywany numer pasuje do **dokładnie jednego** kontaktu, w obszarze powiadomień pojawia się „Dopasowano do wpisywanego numeru" — **zamiast** powiadomień. W pokazanym numerze **cyfry zgodne z tym, co wpisałeś, są wyróżnione innym odcieniem** (zielony akcent, bez pogrubienia).
+- **Zawsze co najwyżej jedno dopasowanie** — to świadome ograniczenie: podpowiedź pokazuje się tylko, gdy fragment cyfr pasuje do jednej osoby (i po wpisaniu min. 2 cyfr). Gdy pasuje kilku kontaktów (np. po jednej cyfrze) albo żaden — podpowiedzi nie ma, więc senior nigdy nie musi wybierać z listy kandydatów.
 - Jeśli wtedy przyjdzie nowa wiadomość/połączenie, to ono (świeższe, priorytetowe) pokazuje się **nad** dopasowaniem.
 - Po odhaczeniu świeżych powiadomień, gdy numer dalej wpisany, znów widać dopasowanie — płynny powrót.
 
