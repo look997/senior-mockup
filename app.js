@@ -605,11 +605,14 @@ let pendingCallRef = null;   // jeśli dzwonimy z karty nieodebranego — by ozn
 // name + phone: pokaż nazwę i numer. Sam numer wpisany: pokaż numer.
 // callRef (opcjonalnie): obiekt z calls[], by "Nie dzwoń" też go oznaczył jako obejrzany.
 const historyBtn = overlay.querySelector('[data-role="show-history"]');
-let confirmContactName = null;   // znana osoba (do historii połączeń)
+let confirmContactName = null;   // znana osoba (do etykiety powrotu)
+let confirmHistName = null;      // nazwa LUB numer rozmówcy — do historii (też nieznany)
+let confirmHistPhone = null;     // numer rozmówcy — do historii (dopasowanie po numerze)
 let confirmOpenedFrom = 'home';  // z którego ekranu otwarto potwierdzenie
 function openConfirm(name, phone, callRef) {
   pendingCallRef = callRef || null;
   confirmContactName = null;
+  confirmHistName = null; confirmHistPhone = null;
   confirmOpenedFrom = currentScreenId();
   if (name) {
     pendingCallName = name;
@@ -617,6 +620,7 @@ function openConfirm(name, phone, callRef) {
     confirmText.innerHTML = 'Zadzwonić do<br><b>' + name + '?</b>' +
       (ph ? '<br><span class="confirm-phone">' + formatPhone(ph) + '</span>' : '');
     if (contacts.some((c) => c.name === name)) confirmContactName = name;
+    confirmHistName = name; confirmHistPhone = ph || null;
   } else if (phone) {
     // Jeśli wpisany numer pasuje do kontaktu — pokaż też nazwę.
     const known = nameForPhone(phone);
@@ -625,6 +629,7 @@ function openConfirm(name, phone, callRef) {
       ? 'Zadzwonić do<br><b>' + known + '?</b><br><span class="confirm-phone">' + formatPhone(phone) + '</span>'
       : 'Zadzwonić pod numer<br><b>' + formatPhone(phone) + '</b>?';
     if (known) confirmContactName = known;
+    confirmHistName = known || formatPhone(phone); confirmHistPhone = phone;
   } else {
     pendingCallName = null;
     confirmText.textContent = 'Najpierw wpisz numer.';
@@ -641,8 +646,9 @@ function openConfirm(name, phone, callRef) {
       confirmAvatar.hidden = true;
     }
   }
-  // Pokaż pozycję historii tylko dla znanego kontaktu.
-  historyBtn.hidden = !confirmContactName;
+  // Pozycja "Ostatnie połączenia z tą osobą" — ZAWSZE gdy dzwonimy do kogoś/pod numer
+  // (pusta historia pokaże "Brak wcześniejszych połączeń"); ukryta tylko dla "wpisz numer".
+  historyBtn.hidden = !(confirmHistPhone || confirmHistName);
   overlay.classList.remove('hidden');
 }
 function closeConfirm() {
@@ -669,24 +675,49 @@ const CONTACT_HISTORY = {
   'Zofia Wiśniewska': [['out','Wykonane','15 cze 2026, 18:05', 92],['missed','Nieodebrane','12 cze 2026, 14:50', null]],
   'Marek Lewandowski':[['out','Wykonane','11 cze 2026, 12:33', 401],['in','Odebrane','10 cze 2026, 19:18', 63]],
 };
-function renderContactHistory(name) {
-  document.getElementById('contact-history-title').textContent = 'Połączenia: ' + name;
+// Scala historię połączeń z daną osobą/numerem: realne wpisy z globalnej listy
+// `calls` (dopasowanie po numerze) + syntetyczna baza CONTACT_HISTORY[name].
+// Zwraca [{dir, label, time, dur}] posortowane malejąco (najświeższe na górze).
+// Sortowanie po monotonicznym kluczu, NIE po dacie (dwa formaty etykiet czasu;
+// to wystarcza dla makiety): wpisy z `calls` (zawsze "dziś/teraz") nad bazą.
+function getContactHistory(name, phone) {
+  const want = digitsOnly(phone || phoneOfName(name) || '');
+  const out = [];
+  if (want) {
+    calls.forEach((c, i) => {
+      if (digitsOnly(c.phone) === want) {
+        out.push({ dir: c.dir, label: c.label, time: c.time, dur: c.dur, _sort: 2000000 - i });
+      }
+    });
+  }
+  (CONTACT_HISTORY[name] || []).forEach((row, i) => {
+    const [dir, label, time, dur] = row;
+    out.push({ dir, label, time, dur, _sort: 1000000 - i });
+  });
+  out.sort((a, b) => b._sort - a._sort);
+  return out;
+}
+function renderContactHistory(name, phone) {
+  // Tytuł i etykieta w kartach: znany kontakt → nazwa; nieznany numer → numer.
+  const known = contacts.some((c) => c.name === name);
+  const display = known ? name : (formatPhone(phone) || name);
+  document.getElementById('contact-history-title').textContent = 'Połączenia: ' + display;
   const wrap = document.getElementById('contact-history-list');
   wrap.innerHTML = '';
-  const list = CONTACT_HISTORY[name] || [];
+  const list = getContactHistory(name, phone);
   if (!list.length) {
     const e = document.createElement('div');
     e.style.cssText = 'padding:40px 24px;font-size:28px;color:#6B7280;text-align:center;font-weight:700;';
     e.textContent = 'Brak wcześniejszych połączeń';
     wrap.appendChild(e); return;
   }
-  list.forEach(([dir, label, time, dur]) => {
+  list.forEach(({ dir, label, time, dur }) => {
     const card = document.createElement('div');
     card.className = 'call-card' + (dir === 'missed' ? ' missed' : '');
     const dirClass = dir === 'in' ? 'dir-in' : dir === 'out' ? 'dir-out' : 'dir-missed';
     const durInline = dur != null ? ' · <span class="call-dur">' + durText(dur) + '</span>' : '';
     card.innerHTML = callIcon(dir) +
-      '<div class="call-info"><div class="call-name">' + name + '</div>' +
+      '<div class="call-info"><div class="call-name">' + display + '</div>' +
       '<div class="call-dir-label ' + dirClass + '">' + label + durInline + '</div></div>' +
       '<div class="call-time">' + time + '</div>';
     wrap.appendChild(card);
@@ -696,8 +727,7 @@ let historyBackTarget = 'contacts';
 const historyBackBtn = document.querySelector('#screen-contact-history .keyboard-btn');
 const historyBackLabel = document.getElementById('history-back-label');
 historyBtn.addEventListener('click', () => {
-  if (!confirmContactName) return;
-  const name = confirmContactName;
+  if (!confirmHistName && !confirmHistPhone) return;
   // Zapamiętaj skąd otwarto potwierdzenie (kontakty/połączenia/wiadomość), by wrócić tam.
   historyBackTarget = (confirmOpenedFrom === 'calls') ? 'calls'
                     : (confirmOpenedFrom === 'message') ? 'message'
@@ -707,7 +737,7 @@ historyBtn.addEventListener('click', () => {
   if (historyBackLabel) historyBackLabel.textContent = BACK_LABELS[historyBackTarget] || 'Kontakty';
   overlay.classList.add('hidden');   // zamknij potwierdzenie bez oznaczania
   pendingCallRef = null;
-  renderContactHistory(name);
+  renderContactHistory(confirmHistName, confirmHistPhone);
   showScreen('contact-history');
 });
 // Dolny przycisk historii wraca do źródła (kontakty/połączenia).
@@ -726,6 +756,7 @@ const videoRemoteAvatar = document.getElementById('video-remote-avatar');
 const videoRemoteName = document.getElementById('video-remote-name');
 let callTimerId = null, callConnectTimer = null, callSeconds = 0;
 let screenBeforeCall = 'home', currentCallName = null, speakerOn = false;
+let currentCallDir = 'out';   // kierunek bieżącej rozmowy: 'out' (my dzwonimy) | 'in' (odebrana)
 
 function initialsFor(name) {
   const c = contacts.find((x) => x.name === name);
@@ -764,6 +795,7 @@ function startCall(name, opts) {
     screenBeforeCall = currentScreenId();
   }
   currentCallName = name;
+  currentCallDir = opts.incoming ? 'in' : 'out';   // 'in' = odbieramy, 'out' = my dzwonimy
   incallName.textContent = name;
   if (incallPhone) incallPhone.textContent = formatPhone(phoneOfName(name)) || '';
   incallAvatar.className = 'incall-avatar avatar ' + avatarColorFor(name);
@@ -801,6 +833,11 @@ function startCall(name, opts) {
 function endCall() {
   if (callTimerId) { clearInterval(callTimerId); callTimerId = null; }
   if (callConnectTimer) { clearTimeout(callConnectTimer); callConnectTimer = null; }
+  // Dopisz zakończoną rozmowę do historii: wychodzącą (out) lub odebraną (in).
+  if (currentCallName) {
+    logCall({ name: currentCallName, phone: phoneOfName(currentCallName), dir: currentCallDir, dur: callSeconds });
+    currentCallName = null;
+  }
   buzz(30);
   showScreen(screenBeforeCall || 'home');
 }
@@ -1114,6 +1151,26 @@ function simStamp() {
   return '16 cze, ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
 }
 
+// Dopisuje połączenie na GÓRĘ listy "Połączenia" (i odświeża widok/oznaczenia).
+// dir: 'in' (odebrane) | 'out' (wykonane) | 'missed' (nieodebrane).
+const CALL_LABELS = { in: 'Odebrane', out: 'Wykonane', missed: 'Nieodebrane' };
+function logCall(opt) {
+  const dir = opt.dir;
+  const c = {
+    name: opt.name,
+    phone: opt.phone || phoneOfName(opt.name) || '',
+    dir,
+    label: CALL_LABELS[dir] || 'Połączenie',
+    time: simStamp(),
+    dur: dir === 'missed' ? null : (opt.dur || 0),
+    handled: dir !== 'missed',                 // nieodebrane wymaga obejrzenia
+    unknown: opt.unknown != null ? !!opt.unknown : !contacts.some((x) => x.name === opt.name),
+  };
+  calls.unshift(c);
+  updateBadges(); renderCalls();
+  return c;
+}
+
 attachLongPress(document.getElementById('messages-tile'), () => {
   const t = SIM_SENDERS[nextMsgIdx % SIM_SENDERS.length]; nextMsgIdx++;
   // NOWY wpis na górze skrzynki.
@@ -1157,7 +1214,10 @@ function answerIncomingAudio() {
   if (incomingFrom) startCall(incomingFrom.name, { incoming: true, video: false });
 }
 function declineIncoming() {
-  stopRingtone(); buzz(40); showScreen('home');
+  stopRingtone(); buzz(40);
+  // Odrzucone przychodzące = nieodebrane w historii.
+  if (incomingFrom) logCall({ name: incomingFrom.name, phone: incomingFrom.phone, dir: 'missed', unknown: incomingFrom.unknown });
+  showScreen('home');
 }
 function simulateIncoming(forceVideo) {
   // Zwykłe przychodzące (long-press Zadzwoń) = głos. Wideo TYLKO wymuszone (long-press Kontakty).

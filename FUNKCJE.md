@@ -38,7 +38,7 @@ Panel pojawiający się nad klawiaturą na ekranie głównym.
 ### Popup potwierdzenia dzwonienia
 Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 - Duża nazwa i duży numer rozmówcy.
-- Przyciski: zielony **Tak, zadzwoń**, niebieski **Zrób wideorozmowę**, **Ostatnie połączenia z tą osobą** (dla znanego kontaktu, delikatny styl), **Nie dzwoń**.
+- Przyciski: zielony **Tak, zadzwoń**, niebieski **Zrób wideorozmowę**, **Ostatnie połączenia z tą osobą** (zawsze dostępne — pusta historia pokaże komunikat; delikatny styl), **Nie dzwoń**.
 - Zamykają je tylko przyciski (nie kliknięcie w tło). „Nie dzwoń" oznacza nieodebrane jako obejrzane.
 
 ---
@@ -84,7 +84,9 @@ Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 
 ### Ostatnie połączenia z kontaktem
 - Historia połączeń z jedną osobą, w stylu listy połączeń, z dokładnymi datami i czasem trwania.
-- Dolny przycisk wraca do źródła: **Kontakty** albo **Połączenia** (zależnie skąd otwarto).
+- Łączy świeże połączenia (z bieżącej sesji, w tym symulowane) z wcześniejszą historią; najnowsze na górze.
+- Dla osoby/numeru bez żadnych połączeń pokazuje „Brak wcześniejszych połączeń".
+- Dolny przycisk wraca do źródła: **Kontakty**, **Połączenia** albo **Wiadomość** (zależnie skąd otwarto).
 
 ### Potwierdzenie połączenia
 - Widok-nakładka opisany w „Elementy wspólne → Popup potwierdzenia dzwonienia".
@@ -188,6 +190,7 @@ Tu chodzi wyłącznie o ręczne wywołanie zdarzeń, których w makiecie nikt z 
 - **Pomarańczowa kropka powiadomień ogólnych** (Pasek statusu) — przytrzymaj strefę **baterii** (prawa strona oczka); ponowne przytrzymanie ją gasi.
 
 Szczegóły symulacji:
+- **Zakończone rozmowy trafiają na listę „Połączenia"** — każda rozmowa dopisuje się do historii po zakończeniu: wychodząca jako „Wykonane" (z czasem trwania), odebrana przychodząca jako „Odebrane", a odrzucona przychodząca jako „Nieodebrane". Pojawiają się też w „Ostatnich połączeniach z tą osobą".
 - **Powiadomienia startowe** — po uruchomieniu w kolejce powiadomień są już domyślne nieprzeczytane wiadomości i nieodebrane połączenia (znaczniki z liczbą na kaflach pokazują ich liczbę). Stanowią punkt wyjścia do przeglądania.
 - **Faza nawiązywania ~2 s** — przy połączeniu wychodzącym przez około dwie sekundy widać status „Nawiązywanie połączenia…", po czym status zmienia się na „Trwa połączenie" i rusza licznik. To symulacja czasu zestawiania.
 - **Ograniczenia środowiska** — efekty fizyczne prawdziwych funkcji nie zachodzą w aplikacji webowej: latarka nie zapala realnie diody, wyciszenie nie ucisza systemowego dzwonka, sekretne wrota nie przenoszą faktycznie do natywnego launchera, a obraz wideorozmowy jest placeholderem. Same funkcje są jednak prawdziwe i ich logika działa.
