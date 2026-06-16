@@ -190,6 +190,10 @@ Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 - Wpisany numer pasujący do kontaktu pokazuje jego nazwę.
 - Wiadomości i połączenia od numerów spoza kontaktów pokazują sam numer i szary awatar.
 
+### Jeden numer = jeden wpis na liście kontaktów
+- Kontakt **nie ma wielu numerów**. Osoba z kilkoma numerami jest **rozbita na osobne wpisy** z dopiskiem w nazwie, np. „Halina Dąbrowska (komórka)" i „Halina Dąbrowska (dom)" — każdy z jednym numerem.
+- **Dlaczego:** zwykły androidowy kontakt po wybraniu pokazuje listę numerów do wyboru („komórka / dom / praca…") — to dodatkowy krok decyzyjny i ekran, który dla seniora jest mylący. Tu wybór osoby = od razu wybór numeru, bez pośredniego pytania. Cena: jeden kontakt z systemu rozpada się na dwa wpisy obok siebie na liście (w zamian żaden ekran nie wymaga wyboru „pod który numer").
+
 ### Połączenia
 - Połączenie wymaga potwierdzenia. Może pojawić się informacja o nawiązywaniu połączenia przed jego zestawieniem.
 - Odbierane połączenie łączy się od razu.
@@ -208,6 +212,7 @@ Nakładka ma być maksymalnie prosta dla seniora i **nie wypuszczać go poza sie
 - **Pisanie i wysyłanie wiadomości** — wiadomości są tylko do odczytu; jedyna odpowiedź to oddzwonienie. Brak klawiatury tekstowej i ekranu redagowania.
 - **Usuwanie wiadomości** — nie ma kasowania ze skrzynki; wiadomości tylko się czyta i oznacza jako przeczytane (mniej akcji do pomylenia, brak ryzyka utraty czegoś ważnego).
 - **Osobny kalendarz i alarmy** — brak aplikacji kalendarza, budzika czy przypomnień. Tego rodzaju funkcje są poza zakresem prostego launchera.
+- **Aplikacja aparatu** — brak aparatu/galerii. Robienie i przeglądanie zdjęć to osobny, złożony świat (uprawnienia, podgląd, zarządzanie plikami); nakładka skupia się na dzwonieniu i wiadomościach.
 - **Osobne ustawienia** — nie ma ekranu ustawień. Nieliczne przełączniki (tryb ciemny, wyciszenie, latarka) są dostępne przez przytrzymanie odpowiednich elementów, bez menu konfiguracji.
 - **Jakiekolwiek inne aplikacje w nakładce** — nakładka nie jest pełnym launcherem z siatką aplikacji; nie da się z niej uruchomić żadnego innego programu. Są tylko: telefon, kontakty, wiadomości, połączenia.
 - **Działające linki i wyjścia poza nakładkę** — **linki w treści wiadomości celowo nie działają**, żeby kliknięcie nie otworzyło przeglądarki i nie wyrwało użytkownika z nakładki. Tak samo blokowana jest każda inna droga ucieczki — gest, długie przytrzymanie tekstu, menu kontekstowe. Jedyne wyjście to ukryte „sekretne wrota" (opisane w funkcjach), wymagające celowej, trudnej do przypadkowego wykonania sekwencji.

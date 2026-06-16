@@ -5,11 +5,18 @@
    ========================================================================= */
 
 // ---------------- DANE PRZYKŁADOWE ----------------
+// DECYZJA PROJEKTOWA: jeden wpis = jeden numer. Kontakt z androida mający kilka
+// numerów jest rozbijany na osobne wpisy z dopiskiem (np. "(komórka)" / "(dom)"),
+// zamiast wyboru numeru po wybraniu osoby. Przykład: Halina Dąbrowska poniżej.
+// Patrz FUNKCJE.md → decyzje projektowe.
 const contacts = [
-  { name: 'Jan Kowalski',      initials: 'JK', color: 'av-blue',   phone: '+48 601 234 567', favorite: true  },
-  { name: 'Anna Nowak',        initials: 'AN', color: 'av-green',  phone: '+48 602 345 678', favorite: true  },
-  { name: 'Zofia Wiśniewska',  initials: 'ZW', color: 'av-red',    phone: '+48 603 456 789', favorite: false },
-  { name: 'Marek Lewandowski', initials: 'ML', color: 'av-purple', phone: '+48 604 567 890', favorite: false },
+  { name: 'Jan Kowalski',         initials: 'JK', color: 'av-blue',   phone: '+48 601 234 567', favorite: true  },
+  { name: 'Anna Nowak',           initials: 'AN', color: 'av-green',  phone: '+48 602 345 678', favorite: true  },
+  { name: 'Zofia Wiśniewska',     initials: 'ZW', color: 'av-red',    phone: '+48 603 456 789', favorite: false },
+  { name: 'Marek Lewandowski',    initials: 'ML', color: 'av-purple', phone: '+48 604 567 890', favorite: false },
+  // Dwa numery tej samej osoby = dwa osobne wpisy (jeden wpis = jeden numer):
+  { name: 'Halina Dąbrowska (komórka)', initials: 'HD', color: 'av-blue', phone: '+48 605 111 222', favorite: false },
+  { name: 'Halina Dąbrowska (dom)',     initials: 'HD', color: 'av-blue', phone: '+48 22 778 90 12', favorite: false },
 ];
 
 function phoneOf(name) {
