@@ -558,7 +558,11 @@ document.querySelectorAll('.dialer').forEach((dialer) => {
     if (mode === 'phone') {
       display.textContent = formatDial(value);
     } else if (lastKey !== null && value.length > 0) {
-      display.innerHTML = esc(value.slice(0, -1)) + '<span class="cycling">' + esc(value.slice(-1)) + '</span>';
+      // Podświetlany ostatni znak: spację pokazujemy jako &nbsp;, by miała szerokość
+      // (zwykła spacja w <span> z tłem kolapsuje → byłaby niewidoczna). Value bez zmian.
+      const last = value.slice(-1);
+      const lastHTML = last === ' ' ? '&nbsp;' : esc(last);
+      display.innerHTML = esc(value.slice(0, -1)) + '<span class="cycling">' + lastHTML + '</span>';
     } else {
       display.textContent = value;
     }

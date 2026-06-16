@@ -186,6 +186,8 @@ w light theme: Lagodne ramki zamiast ostrych ramek przyciskow (łagodne jak odcz
 
 bug: wpisanie spacja w trakcie jeszcze cyklu, gdy jeszcze wpisana spacja podswietlona, to ona ma za maja szerokosci, jaby jej nie bylo w srodku, a juz przy pisaniu nastepnej literki ma szerokosc. to cos w trakcie, przy podsiwetleniu i bialym znaku?
 
+kontakty ma buga, ze jak dojade do konca listy to nadal sie przewija ale wolniej w pusta przestrzen. napraw
+
 ---
 
 
@@ -203,7 +205,6 @@ Moze szare albo mniej intensywne oddzwon odrzuc w powiadomieniach zeby mniej prz
 reszta:
 
 
-kontakty ma buga, ze jak dojade do konca listy to nadal sie przewija ale wolniej w pusta przestrzen. napraw
 
 Suwak jak za malo miejsca na liscie polaczen, polaczen z ta osoba, wiadomosci, czytania wiadomosci - taki cienki custom w powietrzu nie zajmujacy miejsca  - taka jak w kontakty
 
