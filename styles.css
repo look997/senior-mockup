@@ -935,17 +935,9 @@ main {
 .lock-hint {
   font-size: 60px; font-weight: 800; color: #FFF; text-align: center; line-height: 1.2;
 }
-/* Gdy ekran zablokowany — pasek statusu też ciemny (dopasowany do tła blokady) */
-/* Ekran blokady i pasek statusu mają TO SAMO ciemne tło (#15171b) — spójnie,
-   bez szwu. W trybie JASNYM pasek przechodzi na ciemno (html.locked); w trybie
-   CIEMNYM nie trzeba nic nadpisywać, bo wszystko jest już ciemne i spójne. */
-html.locked:not(.dark) .status-bar { background: #15171b; border-bottom-color: #2A2D33; }
-html.locked:not(.dark) #clock,
-html.locked:not(.dark) #date,
-html.locked:not(.dark) #batt-pct { color: #FFF; }
-html.locked:not(.dark) .status-indicators svg [fill="#1A1A1A"] { fill: #FFF; }
-html.locked:not(.dark) .status-indicators svg [stroke="#1A1A1A"] { stroke: #FFF; }
-html.locked:not(.dark) .status-indicators svg [fill="#C8CCD2"] { fill: #555; }
+/* Reguły ekranu blokady (pasek statusu + sam ekran) są zebrane na KOŃCU pliku,
+   po sekcji trybu ciemnego — patrz "EKRAN BLOKADY — wygląd identyczny w obu
+   trybach". Dzięki temu html.locked przebija html.dark przy równej specyficzności. */
 
 /* ---------- TRYB CIEMNY (przytrzymaj strefę zasięgu) ---------- */
 html.dark {
@@ -993,10 +985,6 @@ html.dark #screen-incall,
 html.dark #screen-incoming { background: var(--bg); }
 html.dark .incall-name,
 html.dark .incall-timer { color: var(--ink); }
-/* W trybie ciemnym blokada = ten sam kolor co ciemny pasek statusu (spójność, bez szwu). */
-/* W trybie ciemnym ekran blokady i pasek statusu mają IDENTYCZNE tło
-   (kolor paska = var(--surface)), żeby NIE było szwu między nimi. */
-html.dark #screen-lock { background: var(--surface); }
 /* Kafel Wiadomości w trybie ciemnym: ciemniejszy niebieski + jasna (biała) ikona koperty */
 html.dark .tile-messages { background: #16315c; border-color: #16315c; box-shadow: 0 2px 6px rgba(0,0,0,.10); }
 html.dark .tile-messages svg [fill="#FFFFFF"] { fill: #FFFFFF; }     /* koperta biała */
@@ -1040,6 +1028,30 @@ html.dark .ctrl-btn:active,
 html.dark .neutral-btn:active { background: #2A313A; }
 /* Bateria: ramka jasna */
 html.dark .ico-batt rect[stroke="#1A1A1A"] { stroke: var(--ink); }
+
+/* =========================================================================
+   EKRAN BLOKADY — wygląd IDENTYCZNY w trybie jasnym i ciemnym.
+   Ekran blokady sam w sobie jest ciemny; tryb ciemny nie ma go zmieniać.
+   Te reguły są CELOWO na końcu pliku (po całej sekcji html.dark), żeby przy
+   równej specyficzności html.locked przebijał html.dark.
+   ========================================================================= */
+/* Tło ekranu blokady — to samo #15171b niezależnie od motywu (bazowo ustawione
+   wyżej; w dark domyślnie wpadłoby var(--surface)=#1C2127, więc nadpisujemy). */
+html.dark #screen-lock { background: #15171b; }
+/* Kłódka SVG: korpus/pałąk białe, „dziurka" (oczko) ciemna — także w trybie
+   ciemnym, gdzie globalne html.dark svg[...] inaczej zlałoby oczko z korpusem. */
+html.dark #screen-lock svg [fill="#FFFFFF"] { fill: #FFFFFF; }
+html.dark #screen-lock svg [stroke="#FFFFFF"] { stroke: #FFFFFF; }
+html.dark #screen-lock svg [fill="#1A1A1A"] { fill: #1A1A1A; }
+/* Pasek statusu na zablokowanym ekranie — ciemny (#15171b), białe napisy/ikony,
+   w OBU trybach (bez tego w dark pasek = #1C2127 → szew nad tłem blokady). */
+html.locked .status-bar { background: #15171b; border-bottom-color: #2A2D33; }
+html.locked #clock,
+html.locked #date,
+html.locked #batt-pct { color: #FFF; }
+html.locked .status-indicators svg [fill="#1A1A1A"] { fill: #FFF; }
+html.locked .status-indicators svg [stroke="#1A1A1A"] { stroke: #FFF; }
+html.locked .status-indicators svg [fill="#C8CCD2"] { fill: #555; }
 
 /* =========================================================================
    SUPERELLIPSE (squircle) — przyjemniejsze zaokrąglenie prostokątnych
