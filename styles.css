@@ -222,7 +222,10 @@ main {
 .app-tile svg { width: clamp(40px, 40cqh, 80px); height: clamp(40px, 40cqh, 80px); }
 .app-tile span { font-size: clamp(26px, 18cqh, 36px); font-weight: 800; }
 .tile-contacts { color: var(--ink); }
-.tile-messages { background: var(--blue); border-color: var(--blue); color: #FFF; box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+/* Kafel Wiadomości jak pozostałe: biały z czarną ikoną/napisem (jasny motyw). */
+.tile-messages { color: var(--ink); }
+.tile-messages svg [fill="#FFFFFF"] { fill: var(--ink); }      /* koperta czarna */
+.tile-messages svg [stroke="#0D47A1"] { stroke: var(--surface); }  /* linia zagięcia pod tło karty */
 .tile-calls { color: var(--ink); }
 .tile-mute { color: var(--ink); }
 /* Domyślnie (dźwięk wł): fale widoczne, przekreślenie ukryte */
@@ -239,12 +242,12 @@ main {
   position: absolute; top: 14px; right: 14px;
   width: 56px; height: 56px;
   border-radius: 50%;
-  background: var(--red); color: #FFF;
+  background: #AB4848; color: #FFF;
   font-size: 32px; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
 }
 /* Na ciemnym kaflu (Wiadomości) obwódka dla kontrastu */
-.tile-messages .corner-badge { box-shadow: 0 0 0 4px var(--blue); }
+.tile-messages .corner-badge { box-shadow: 0 0 0 4px var(--surface); }
 .tile-calls .corner-badge { box-shadow: 0 0 0 4px var(--surface); }
 .corner-badge[hidden] { display: none; }
 
@@ -302,22 +305,23 @@ main {
 .notif-actions { display: flex; gap: 14px; }
 .notif-actions button {
   flex: 1; height: 104px;
-  border: none; border-radius: 20px;
-  font-size: 34px; font-weight: 800; color: #FFF;
+  border-radius: 20px;
+  font-size: 34px; font-weight: 800;
   display: flex; align-items: center; justify-content: center; gap: 10px;
   transition: transform .04s, box-shadow .04s, background .04s;
 }
-/* Mały badge z liczbą na przycisku CZYTAJ/ODDZWOŃ (gdy >1 zdarzenie z numeru). */
+/* Mały badge z liczbą na przycisku CZYTAJ/ODDZWOŃ (gdy >1 zdarzenie z numeru).
+   Przyciski są białe z kolorowym akcentem — badge ma kolorowe TŁO (akcent przycisku)
+   i biały napis, by odciąć się czytelnie na białym tle przycisku. */
 .act-badge {
   min-width: 40px; height: 40px; padding: 0 8px;
   border-radius: 20px;
-  background: #FFF; color: var(--ink);
+  color: #FFF;
   font-size: 26px; font-weight: 800;
   display: inline-flex; align-items: center; justify-content: center;
 }
-/* Tło badge jest zawsze białe — w dark theme --ink jest jasny, więc napis
-   byłby biały na białym. Wymuś czarny tekst niezależnie od motywu. */
-html.dark .act-badge { color: #1A1A1A; }
+.notif-green .act-badge { background: var(--green); }
+.notif-red   .act-badge { background: var(--red); }
 /* Karta-podpowiedź dopasowania numeru do kontaktu. BEZ własnego gap — używa
    tego samego justify-content:space-between co karty msg/call, by elementy
    (awatar/nazwa/numer/przyciski) były na IDENTYCZNEJ wysokości. */
@@ -331,10 +335,18 @@ html.dark .act-badge { color: #1A1A1A; }
   color: #FFF; font-size: 26px; font-weight: 800;
 }
 
-.notif-green { background: var(--green); box-shadow: 0 2px 6px rgba(0,0,0,.10); }
-.notif-green:active { box-shadow: 0 2px 6px rgba(0,0,0,.10); }
-.notif-red { background: var(--red); box-shadow: 0 2px 6px rgba(0,0,0,.10); }
-.notif-red:active { box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+/* Przyciski akcji w powiadomieniach: w zasadzie BIAŁE, kolor tylko jako subtelny
+   akcent — tekst/ikona w kolorze funkcji + delikatna kolorowa ramka. Mniej krzyczą
+   niż główne Zadzwoń/Zablokuj, ale wciąż czytelne (zielony = pozytywny, czerwony = odrzuć). */
+.notif-green { background: var(--surface); color: var(--green); border: 3px solid var(--green); box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.notif-green:active { background: #EAF3ED; box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.notif-red { background: var(--surface); color: var(--red); border: 3px solid var(--red); box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.notif-red:active { background: #F7ECEC; box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+/* CZYTAJ (powiadomienie wiadomości) — akcent niebieski (jak motyw wiadomości),
+   żeby odróżnić go od zielonego ODDZWOŃ przy połączeniu. */
+.notif-green[data-act="read"] { color: var(--blue); border-color: var(--blue); }
+.notif-green[data-act="read"]:active { background: #E8EEF8; }
+.notif-green[data-act="read"] .act-badge { background: var(--blue); }
 
 /* ---------- DIALER (WSPÓLNY, IDENTYCZNY: HOME = Kontakty) ----------
    Przyklejony do dołu ekranu o stałej wysokości; treść nad nim (kafle/lista)
@@ -448,6 +460,7 @@ html.dark .act-badge { color: #1A1A1A; }
   border-radius: 22px;
   display: flex; align-items: center; justify-content: center;
   color: #FFF; font-size: 34px; font-weight: 800;
+  filter: opacity(51.7%) saturate(22%);   /* przygaszony: niska saturacja + częściowe krycie, by nie dominował nad cyfrą */
 }
 @supports (corner-shape: superellipse(1)) {
   .key-fav { corner-shape: superellipse(1); }   /* ten sam miękki kształt co klawisz */
@@ -682,20 +695,17 @@ html.dark .act-badge { color: #1A1A1A; }
 .bubble.in .bubble-time { color: var(--muted); }
 .bubble.out .bubble-time { color: rgba(255,255,255,.8); }
 /* Załącznik MMS (zdjęcie) */
-.mms-attach[hidden] { display: none; }
-.mms-attach {
-  background: var(--surface);
-  border: 3px solid var(--line);
-  border-radius: 24px;
-  padding: 18px;
-  display: flex; flex-direction: column; gap: 12px; align-items: center;
-}
 .mms-photo {
   width: 100%; height: 280px;
   border-radius: 16px;
   background: linear-gradient(135deg, #6A1B9A, #0D47A1 60%, #157A36);
   position: relative; overflow: hidden;
 }
+/* Załącznik MMS WEWNĄTRZ dymka konwersacji — przy swojej wiadomości. */
+.bubble-mms { margin-bottom: 12px; }
+.bubble-mms .mms-photo { height: 220px; }
+.bubble-mms .mms-label { font-size: 22px; font-weight: 700; opacity: .85; margin-top: 8px; }
+.bubble.out .bubble-mms .mms-label { color: #FFF; }
 .mms-photo::after {
   content: "📷";
   position: absolute; inset: 0;
@@ -1100,7 +1110,6 @@ html.dark .contact-card,
 html.dark .msg-card,
 html.dark .call-card,
 html.dark .bubble.in,
-html.dark .mms-attach,
 html.dark .confirm-card,
 html.dark .ctrl-btn,
 html.dark .incall-avatar,
@@ -1116,9 +1125,9 @@ html.dark #screen-incoming { background: var(--bg); }
 html.dark .incall-name,
 html.dark .incall-timer { color: var(--ink); }
 /* Kafel Wiadomości w trybie ciemnym: ciemniejszy niebieski + jasna (biała) ikona koperty */
-html.dark .tile-messages { background: #16315c; border-color: #16315c; box-shadow: 0 2px 6px rgba(0,0,0,.10); }
-html.dark .tile-messages svg [fill="#FFFFFF"] { fill: #FFFFFF; }     /* koperta biała */
-html.dark .tile-messages svg [stroke="#0D47A1"] { stroke: #16315c; } /* linia koperty pod tło */
+/* Dark: kafel czarny (jak inne kafle = --surface ciemny) z BIAŁĄ ikoną koperty. */
+html.dark .tile-messages svg [fill="#FFFFFF"] { fill: #FFFFFF; }          /* koperta biała */
+html.dark .tile-messages svg [stroke="#0D47A1"] { stroke: var(--surface); } /* linia zagięcia pod tło karty */
 html.dark .tile-mute.muted { background: #3a1f1f; }
 /* Miganie pola "Wpisz numer" — wariant na ciemny motyw */
 html.dark .num-field.flash { animation: fieldFlashDark .5s ease 2; }
@@ -1145,9 +1154,9 @@ html.dark .msg-card .card-corner { background: #2f6bd6; }
 html.dark svg [fill="#1A1A1A"] { fill: var(--ink); }
 html.dark svg [stroke="#1A1A1A"] { stroke: var(--ink); }
 html.dark svg [fill="#FFFFFF"] { fill: var(--ink); }   /* np. wnętrze koperty na jasnym tle */
-/* ALE koperta na NIEBIESKIM kaflu Wiadomości ma zostać BIAŁA (kontrast). */
+/* Koperta na czarnym kaflu Wiadomości — BIAŁA (kontrast); linia zagięcia pod tło karty. */
 html.dark .tile-messages svg [fill="#FFFFFF"] { fill: #FFFFFF; }
-html.dark .tile-messages svg [stroke="#0D47A1"] { stroke: #16315c; }
+html.dark .tile-messages svg [stroke="#0D47A1"] { stroke: var(--surface); }
 /* Stany :active na ciemno */
 html.dark .key:active,
 html.dark .back-btn:active,
@@ -1205,7 +1214,7 @@ html.locked .status-indicators svg [fill="#C8CCD2"] { fill: #555; }
   .video-call-btn, .neutral-btn, .history-btn, .back-red-btn,
   .ctrl-btn, .answer-btn, .decline-btn, .hangup-btn, .answer-audio-btn,
   .num-field, .contact-card, .msg-card, .call-card, .message-text,
-  .mms-attach, .confirm-card, .screen-title, .video-self {
+  .confirm-card, .screen-title, .video-self {
     corner-shape: superellipse(1);
   }
 }

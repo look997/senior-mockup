@@ -529,11 +529,13 @@ document.querySelectorAll('.dialer').forEach((dialer) => {
   function updateRedButton() {
     redBtn.className = wideClass;
     if (mode === 'filter' && kbdHidden) {
-      // Klawiatura schowana → redBtn = "Klawiatura" (strzałka w GÓRĘ), z prawej; obok "Powiadomienia".
-      redBtn.innerHTML = '<span class="swipe-arrow">▲</span><span>Klawiatura</span>';
-      if (notifBtn) notifBtn.hidden = false;
+      // Klawiatura schowana w Kontaktach → NIE ma przycisku jej przywracania.
+      // Zostaje sam "Powiadomienia" (pełna szerokość); redBtn schowany.
+      redBtn.hidden = true;
+      if (notifBtn) { notifBtn.hidden = false; notifBtn.classList.add('del-wide'); }
       return;
     }
+    redBtn.hidden = false;
     if (notifBtn) notifBtn.hidden = true;
     if (value.length > 0) {
       redBtn.innerHTML = SVG.backspaceWhite + '<span>Usuń</span>';
@@ -611,7 +613,6 @@ document.querySelectorAll('.dialer').forEach((dialer) => {
 
   redBtn.addEventListener('click', () => {
     if (redBtn.dataset.lp === '1') { redBtn.dataset.lp = '0'; return; } // po long-pressie (Zablokuj)
-    if (mode === 'filter' && kbdHidden) { setKbdHidden(false); buzz(15); return; }  // "Klawiatura" → przywróć
     if (value.length > 0) { value = value.slice(0, -1); commitCycle(); render(); buzz(15); }
     else if (mode === 'phone') { buzz([8, 30, 8]); /* "Zablokuj" wymaga przytrzymania */ }
     else { setKbdHidden(true); buzz(15); }   // Kontakty, puste pole → "Bez klawiatury" → schowaj
@@ -1056,11 +1057,14 @@ document.querySelector('[data-role="to-audio"]').addEventListener('click', goAud
 function msgCardHTML(m) {
   // Znacznik nieprzeczytanej: numer ma JAKĄKOLWIEK nieprzeczytaną wiadomość.
   const hasUnread = unreadCountFrom(m.phone) > 0;
+  // [MMS] gdy WŚRÓD NIEODCZYTANYCH z tego numeru jest MMS (zwraca uwagę na
+  // nieodczytany załącznik, nawet jeśli najnowsza/podgląd to zwykły SMS).
+  const showMms = unreadMmsFrom(m.phone);
   return '<span class="avatar ' + (m.color || 'av-gray') + '">' + (m.initials || '?') + '</span>' +
     '<div class="msg-body">' +
       '<div class="msg-time">' + m.time + '</div>' +
       '<div class="msg-sender">' + m.sender + '</div>' +
-      '<div class="msg-preview">' + (m.mms ? '<span class="msg-mms-tag">[MMS]</span>' : '') + m.preview + '</div>' +
+      '<div class="msg-preview">' + (showMms ? '<span class="msg-mms-tag">[MMS]</span>' : '') + m.preview + '</div>' +
     '</div>' +
     (hasUnread ? '<div class="card-corner"></div>' : '');
 }
@@ -1111,7 +1115,6 @@ const msgSender = document.getElementById('message-sender');
 const msgPhone = document.getElementById('message-phone');
 const msgTime = document.getElementById('message-time');
 const msgText = document.getElementById('message-text');
-const msgMms = document.getElementById('message-mms');
 const msgCallBtn = document.getElementById('message-call');
 const msgReadBtn = document.getElementById('message-read');
 let openMessageSender = null;
@@ -1131,19 +1134,22 @@ function conversationFor(phone) {
     // Dołącz pojedyncze wpisy tego numeru NIEbędące nośnikiem thread (np. nowe z symulacji),
     // jako dymki 'in', w kolejności rosnącej (odwrócone, bo messages ma najnowsze pierwsze).
     ofNum.filter((m) => m !== withThread).reverse().forEach((m) => {
-      conv.push({ from: m.from || 'in', text: m.body || m.preview, time: m.time });
+      conv.push({ from: m.from || 'in', text: m.body || m.preview, time: m.time, mms: !!m.mms });
     });
     return conv;
   }
-  // Brak thread: złóż wątek z pojedynczych wpisów (rosnąco).
-  return ofNum.slice().reverse().map((m) => ({ from: m.from || 'in', text: m.body || m.preview, time: m.time }));
+  // Brak thread: złóż wątek z pojedynczych wpisów (rosnąco). MMS jest własnością
+  // KONKRETNEJ wiadomości — niesiemy flagę do dymka, by załącznik trafił przy niej.
+  return ofNum.slice().reverse().map((m) => ({ from: m.from || 'in', text: m.body || m.preview, time: m.time, mms: !!m.mms }));
 }
 
 // Pojedynczy dymek konwersacji. esc() + \n → <br>, by zachować akapity długiego tekstu.
-function bubbleHTML(from, text, time) {
+// MMS (mms===true) to własność TEJ wiadomości — dokleja zdjęcie w obrębie jej dymka.
+function bubbleHTML(from, text, time, mms) {
   const body = esc(text).replace(/\n/g, '<br>');
   const t = time ? '<span class="bubble-time">' + esc(time) + '</span>' : '';
-  return '<div class="bubble ' + (from === 'out' ? 'out' : 'in') + '">' + body + t + '</div>';
+  const photo = mms ? '<div class="bubble-mms"><div class="mms-photo"></div><div class="mms-label">Zdjęcie w wiadomości</div></div>' : '';
+  return '<div class="bubble ' + (from === 'out' ? 'out' : 'in') + '">' + photo + body + t + '</div>';
 }
 // Otwiera CAŁĄ konwersację z numeru. Przyjmuje wpis wiadomości (obiekt) — albo,
 // dla zgodności, indeks do messages[]. Wyświetla wszystkie wiadomości tego numeru
@@ -1158,9 +1164,9 @@ function openMessage(mOrIndex, fromNotif) {
   msgPhone.textContent = formatPhone(m.phone) || '';
   msgTime.textContent = m.time;
   // Cały wątek numeru (wszystkie wiadomości tej osoby) jako dymki.
+  // Załącznik MMS jest WEWNĄTRZ właściwego dymka (przy swojej wiadomości), nie na dole wątku.
   const conv = conversationFor(m.phone);
-  msgText.innerHTML = conv.map((b) => bubbleHTML(b.from, b.text, b.time)).join('');
-  msgMms.hidden = !m.mms;          // pokaż załącznik MMS tylko dla MMS
+  msgText.innerHTML = conv.map((b) => bubbleHTML(b.from, b.text, b.time, b.mms)).join('');
   openMessageSender = m.sender;
   // Odczyt konwersacji oznacza WSZYSTKIE wiadomości z numeru jako przeczytane
   // i zdejmuje całą grupę z powiadomień.
@@ -1413,6 +1419,12 @@ function handleAllMissedFrom(phone) {
 function unreadCountFrom(phone) {
   const key = digitsOnly(phone || '');
   return messages.filter((m) => m.unread && digitsOnly(m.phone) === key).length;
+}
+// Czy WŚRÓD NIEODCZYTANYCH z tego numeru jest jakiś MMS — decyduje o znaczku [MMS]
+// na karcie listy (nawet jeśli najnowsza/podgląd to zwykły SMS).
+function unreadMmsFrom(phone) {
+  const key = digitsOnly(phone || '');
+  return messages.some((m) => m.unread && m.mms && digitsOnly(m.phone) === key);
 }
 function missedCountFrom(phone) {
   const key = digitsOnly(phone || '');

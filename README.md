@@ -97,13 +97,13 @@ Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 - **Jeden wpis = jedna konwersacja (numer).** Wszystkie wiadomości od tego samego numeru to jedna karta — podgląd pokazuje najnowszą wiadomość, znacznik nieprzeczytanej zapala się, gdy w rozmowie jest cokolwiek nieprzeczytanego.
 - Karta: awatar, nadawca, podgląd najnowszej, data i godzina (np. „16 cze, 14:05").
 - **Nieprzeczytane na górze** (niebieski obrys + znacznik), pod nimi etykieta „Przeczytane" i reszta.
-- MMS oznaczony etykietą „[MMS]" (niebieska gdy nieprzeczytane, szara po przeczytaniu).
+- Etykieta „[MMS]" pojawia się na karcie, gdy **wśród nieodczytanych** wiadomości z tego numeru jest MMS — zwraca uwagę na nieodczytany załącznik, nawet jeśli najnowsza (podgląd) to zwykły SMS.
 - Czerwony przycisk **Powiadomienia** na dole.
 
 ### Czytanie wiadomości
 - Awatar, nazwa nadawcy, jego numer, data i godzina.
 - **Cała konwersacja z numeru** — wszystkie wiadomości od tej osoby jako wątek dymków: **przychodzące** z lewej (szare) i **wysłane** przez użytkownika z prawej (zielone), każdy z godziną. Najnowsze na dole (jak w komunikatorze). Otwarcie którejkolwiek wiadomości z numeru pokazuje pełny wątek.
-- Dla MMS — kafelek ze zdjęciem.
+- **MMS to część konwersacji** — załącznik (kafelek ze zdjęciem) jest **wewnątrz dymka tej konkretnej wiadomości**, która była MMS-em, a nie doczepiony na dole całego wątku. W jednej rozmowie może być kilka MMS-ów, każdy przy swojej wiadomości.
 - Przyciski: zielony **Zadzwoń** do nadawcy, czerwony **Przeczytane**.
 
 ### Połączenia
