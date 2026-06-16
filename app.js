@@ -614,15 +614,15 @@ function openConfirm(name, phone, callRef) {
   if (name) {
     pendingCallName = name;
     const ph = phone || phoneOf(name);
-    confirmText.innerHTML = 'Zadzwonić do<br><b>' + name + '</b>' +
-      (ph ? '<br><span class="confirm-phone">' + formatPhone(ph) + '</span>' : '') + '?';
+    confirmText.innerHTML = 'Zadzwonić do<br><b>' + name + '?</b>' +
+      (ph ? '<br><span class="confirm-phone">' + formatPhone(ph) + '</span>' : '');
     if (contacts.some((c) => c.name === name)) confirmContactName = name;
   } else if (phone) {
     // Jeśli wpisany numer pasuje do kontaktu — pokaż też nazwę.
     const known = nameForPhone(phone);
     pendingCallName = known || formatPhone(phone);
     confirmText.innerHTML = known
-      ? 'Zadzwonić do<br><b>' + known + '</b><br><span class="confirm-phone">' + formatPhone(phone) + '</span>?'
+      ? 'Zadzwonić do<br><b>' + known + '?</b><br><span class="confirm-phone">' + formatPhone(phone) + '</span>'
       : 'Zadzwonić pod numer<br><b>' + formatPhone(phone) + '</b>?';
     if (known) confirmContactName = known;
   } else {
