@@ -5,15 +5,17 @@
 'use strict';
 
 const CACHE = 'senior-v1';
+// Ścieżki WZGLĘDNE (rozwiązywane wobec lokalizacji sw.js) — działa zarówno
+// pod localhost/ jak i w podkatalogu GitHub Pages (user.github.io/senior-mockup/).
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/app.js',
-  '/manifest.json',
-  '/icons/192.png',
-  '/icons/512.png',
-  '/icons/512-maskable.png',
+  './',
+  './index.html',
+  './styles.css',
+  './app.js',
+  './manifest.json',
+  './icons/192.png',
+  './icons/512.png',
+  './icons/512-maskable.png',
 ];
 
 self.addEventListener('install', (e) => {
@@ -40,6 +42,6 @@ self.addEventListener('fetch', (e) => {
         caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
         return res;
       })
-      .catch(() => caches.match(e.request).then((r) => r || caches.match('/index.html')))
+      .catch(() => caches.match(e.request).then((r) => r || caches.match('./index.html')))
   );
 });
