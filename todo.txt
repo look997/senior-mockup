@@ -1,0 +1,95 @@
+w wiadomosciach i polaczeniach
+
+brak usuwania i ok
+
+ale wyrazne oznaczenie ze ostatni nieprzeczytana wiadomosc
+
+i ze w sumie popup o polaczeniu/wiadomosci? w sumie by bylo spoko co nie? takie nad dialerem na home, ze nie znika do kiedy nie zrobisz z tym interakci i zawsze mozesz wrocic. taki troche panel powiadomien(same wiadomosci i nieodebrane polaczenia) ale lepszy dla seniora, po prostu popup powiadomien, ale po prosut po kolei wyswietlaja sie popupy jeden nad drugim, znaczy tylko ten najnowwzy na raz, i po prostu w wiadomosci pisze od kogo i co zajawka i przycisk zielony CZYTAJ i czerwony przeczytalem i tyle. a w polaczenaich to zielony oddzwoni i czerowny odrzuc. i tak po kolei sobie odrzucasz albo reagujesz. super co?
+
+przegladanie po kolei? no wlasnie tak, ale tylko tych nieprzeczytanych
+
+wiec jak wejde w nieprzeczytane recznie, to i tak mi sie wyswietli... aha czekaj, jak wejdziesz w przeczytaj, to wysiwetla sie i wtedy przycisk to zadzwon albo przeczytalem, nadal czerwone. no tak i w przeczytanych (np po wejsciu recznie do wiadomosci) tez przycisk "przeczytalem" czerwony chyba by byl zrozumialy?
+
+po wyborze kontaktu/nieodebranego polaczenia w komunikadzie widac numer telefonu i nazwe lub tylko numer telefonu. obecnie nie widac telefonu nigdzie.
+
+no i na koniec przycisk sprytny do wejscia do pelnego launchera
+
+a czekaj przeciez smartfon ma blokowanie ekranu przyciskiem na boczku to nie.
+
+o wiem przycisk wycisz! to jest potrzebne, nie latarka.
+
+dobrac ekran blokady odcisku palca zeby tez byl pod ten sam styl
+
+przekonac tate ze nei trzeba usuwac wiadomosci, wystarczy oznaczyc jako przeczytane
+
+obsluga mmsow
+
+specjalna kropka kolo zasiegu dajaca info ze sa jakies powiadomienia nie wiadomsoci nie polaczenia. symulowana przytrzymaniem streft z baterią
+jak w home nacisnie zadzwon, a numer nie wpisany to mu ma zamrugac pole wpisz numer
+
+---
+
+info o wifi callig (ze jest). to przy okazji zastapi info ze wifi jest polaczone. albo po co to.
+
+wyswietlanie ulubionych kontaktow, zgodnie z aplikacja natywna telefonu (o ile jestdostep do tego info) i wysiwetlanie ich na samej gorze w kontaktach a jak wpisuje filtruje nazwe kontaktu to niech ulubione przestaja byc na gorze
+
+latarka przytrzymujac klawisz zero, mala ikonka latarki na klawiszu zero
+
+tryb ciemny - przelacznik przytrzymujac strefe oznaczajaca zasieg
+
+niedogodnosc: chcesz wejsc w polaczenia/wiadomosci od razu do przeczytanych a musisz przjesc najpierw nawet odrzucajac, wszystko jak leci
+w sumie mogloby nie zaslaniac tylko zmniejszac przyciski polaczen/wiadomosci
+
+---
+
+ustawienia: nie wiem jakis myk ktorego sie przypadkowo nie zrobi, jakies przytrzymanie dlugo przycisku fizycznego albo nie wiem cos. i wtedy ustawienia juz totalnie zwyczajne bo tym i tak ja bede sie zajmowal. pod spodem zwykle systemowe zarzadzanie kontaktami dziwekami wiadomosciami.
+
+wrota do ustawien/ekranu glownego natywnego dla telefonu - przytrzymanie strefy baterii az bzyknie a potem przytrzymanie strefy zasiegu az bzyknie. git?
+
+---
+
+lista ostatnich polaczen z dana osoba kontaktem - dodatkowa pozycja pod "Nie dzwoń"
+
+wiec dodatkowy widok "ostatnie polaczenia z kontaktem"
+
+symulacja przychodzacej wideo rozmowy - przytrzymac kafelek kontakty
+
+wycisz/odcisz moze przez przytrzymanie
+
+kurwa bug ze jak jestem w polaczenia/kontakty i nacisk Klawiatura to na ekranie glownym miga pi wpisz numer jak bym nacisnal przycisk zadzwon na ekranie glownym
+
+w "dopasowano do wpsiwanego numeru" daj innym odcieniem (nie zgrubiaj) cferki ktore pasują. tak samo w kontaktach literki ktore pasują do kontaktu
+
+przycisk odbierz odrzuc nadchodzace polaczenie - ikonla z lewej napis z prawej a strzalka nad nimi. dzieki temu nie bedzie tak ciasno jesli chodzi o wysokosc w przycisku.
+w w przychodzocej wido przycisk odbirz tylko glosowo niehc tez ma strzleczne nad napisem
+
+zamiast "Przeczytałem" "Przeczytane" bezosobowo
+
+decyzje projektowe:
+* brak funcji pisania i wysylania wiadomosci
+* brak funkcji usuwania wiadomosci
+* brak osobnyego kalendarza i alarmow
+* brak osobnych ustawien
+* brak jakichkolwiek innych aplikacji w nakladce i wlaczania ich z nakladki
+* linki w wiadomosci maja nie dzialac, zeby nie wyrwac z nakaldki, tak samo zadna inna metoda, gest
+* brak tapety bo nie ma gdzie, nawet w widoku blokady ekranu 
+* brak awatara w liscie polaczen i liscie "ostatnie polaczenia z ta osoba" bo tam ikonki rodzaju polaczenia/braku polaczenia
+
+---
+
+NIE:
+
+moze wejscie do messenger/watsap/chrome - nie wiem jak, to zaawansowane i zakladajac ze i tak ogarnia potem co jak wiec rownie dobrze moze se wejsc wrotami i tam siedziec caly czas
+
+---
+
+moze inspo dotychczasowymi aplikacjami zeby ulepszyc wyglad
+
+o no pieknie, jak wejde w wiadomosciach w w wiadomosc i wtedy w zadzwon to i w okienku potwierdzenia dzwonienia jak wejde ta sciezka przez wiadomosci do "Ostantio polaczenia z ta osoba" to  czerwony przycisk na dole jest do "kontakty" a powinno byc do "Czytanie wiadomości" bo stamtąd pochodzi.
+
+ no ale to jest jedno a drugie:  jest "ostatnie polaczenia z ta osoba" o ile jakies sa, a powinno to byc widoczne wlasciwie zawsze, po prostu wyswietli puste. w kontaktach tak samo
+w symulowanym pojaczeniu jak  wywolam popup potwierdzenia polaczenia to tez nie ma "ostatnio poleczenia z ta osoba"
+
+do zrobienia faktycznie: awatary wszedzie (w powiadomieniu, w popupie potwierdzenia dzwonienia, w liscie wiadomosci)
+
+symulacja nie dodaje do listy polaczen glosowych/wideo/odrzuconych ale to nic w sumie

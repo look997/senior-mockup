@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <!-- Sztywny layout 720x1604; skalowanie ramki robi JS (fitFrame), nie viewport. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>Telefon Seniora</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Czarne tło ekranu hosta (S24 FE), na którym centrujemy ramkę Moto E15. -->
+<div class="stage">
+  <!-- Symulowana ramka urządzenia 720x1604 -->
+  <div class="device" id="device">
+    <!-- Symulowane oczko aparatu (punch-hole) -->
+    <div class="punch"></div>
+    <!-- Kropka nietypowych powiadomień — tuż przy PRAWEJ krawędzi oczka aparatu -->
+    <div class="notif-dot" id="notif-dot" hidden></div>
+
+    <!-- ===================== PASEK STATUSU ===================== -->
+    <!-- Zasięg po LEWEJ, bateria po PRAWEJ oczka aparatu (podłużne cieńkie wskaźniki).
+         Pod spodem: godzina + data dużymi literami. -->
+    <header class="status-bar">
+      <div class="status-indicators">
+        <!-- Zasięg (lewa strona oczka): podłużny wskaźnik. Long-press = tryb ciemny. -->
+        <div class="ind ind-signal" aria-label="Zasięg">
+          <svg width="120" height="20" viewBox="0 0 120 20">
+            <rect x="0"   y="6" width="26" height="8" rx="4" fill="#1A1A1A"/>
+            <rect x="31"  y="6" width="26" height="8" rx="4" fill="#1A1A1A"/>
+            <rect x="62"  y="6" width="26" height="8" rx="4" fill="#1A1A1A"/>
+            <rect x="93"  y="6" width="26" height="8" rx="4" fill="#C8CCD2"/>
+          </svg>
+        </div>
+        <!-- miejsce na oczko aparatu pośrodku -->
+        <div class="ind-gap"></div>
+        <!-- Bateria (PRAWA strona oczka). Long-press = włącz/wyłącz kropkę powiadomień. -->
+        <div class="ind ind-batt" aria-label="Bateria">
+          <span id="batt-pct">80%</span>
+          <svg width="120" height="22" viewBox="0 0 120 22">
+            <rect x="1" y="2" width="110" height="18" rx="9" fill="none" stroke="#1A1A1A" stroke-width="3"/>
+            <rect x="113" y="7" width="6" height="8" rx="3" fill="#1A1A1A"/>
+            <rect id="batt-fill" x="5" y="6" width="102" height="10" rx="5" fill="#157A36"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="status-clock">
+        <div id="clock" aria-label="Godzina">08:00</div>
+        <div id="date" aria-label="Data">Poniedziałek, 16 czerwca</div>
+      </div>
+    </header>
+
+    <!-- ===================== EKRANY ===================== -->
+    <main>
+
+      <!-- ---------- EKRAN 1: HOME (kafle + dialer) ---------- -->
+      <section class="screen active" id="screen-home">
+        <!-- Kafle: wycisz | kontakty  /  połączenia | wiadomości -->
+        <div class="apps-grid">
+          <!-- Wycisz: JEDNA ikona naraz. Domyślnie głośnik z falami (dźwięk wł).
+               Po wyciszeniu JS pokazuje przekreślony głośnik (ikona #mute-icon). -->
+          <button class="app-tile tile-mute" id="mute-tile">
+            <svg id="mute-icon" width="60" height="60" viewBox="0 0 60 60" aria-hidden="true">
+              <path id="mute-speaker" d="M8 23h11l14-11v36L19 37H8z" fill="currentColor"/>
+              <g id="mute-waves" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round">
+                <path d="M41 22c4 3 4 13 0 16"/>
+                <path d="M48 16c7 5 7 23 0 28"/>
+              </g>
+              <line id="mute-slash" x1="10" y1="10" x2="54" y2="52" stroke="#B71C1C" stroke-width="6" stroke-linecap="round"/>
+            </svg>
+            <span id="mute-label">Wycisz</span>
+          </button>
+          <button class="app-tile tile-contacts" data-target="contacts">
+            <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="24" cy="16" r="9" fill="#1A1A1A"/>
+              <path d="M7 43c0-9 7.6-15 17-15s17 6 17 15z" fill="#1A1A1A"/>
+            </svg>
+            <span>Kontakty</span>
+          </button>
+          <button class="app-tile tile-calls" data-target="calls" id="calls-tile">
+            <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="24" cy="24" r="20" fill="none" stroke="#1A1A1A" stroke-width="3.5"/>
+              <path d="M24 13v11l8 5" fill="none" stroke="#1A1A1A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Połączenia</span>
+            <span class="corner-badge" id="calls-corner" hidden></span>
+          </button>
+          <button class="app-tile tile-messages" data-target="messages" id="messages-tile">
+            <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+              <rect x="4" y="9" width="40" height="30" rx="5" fill="#FFFFFF"/>
+              <path d="M6 12l18 13 18-13" fill="none" stroke="#0D47A1" stroke-width="4" stroke-linejoin="round"/>
+            </svg>
+            <span>Wiadomości</span>
+            <span class="corner-badge" id="msg-corner" hidden>1</span>
+          </button>
+        </div>
+
+        <!-- Panel powiadomień (w przepływie, nad dialerem; najnowsze na górze) -->
+        <div class="notif-stack" id="notif-stack"><!-- powiadomienia wstrzykiwane JS --></div>
+
+        <!-- Warstwa podpowiedzi dopasowania numeru — pływa NAD obszarem powiadomień -->
+        <div class="notif-hint" id="notif-hint" hidden><!-- wstrzykiwane JS --></div>
+
+        <!-- Dialer (wspólny komponent — IDENTYCZNY jak w Kontaktach) -->
+        <div class="dialer" data-dialer="home" data-mode="phone">
+          <div class="num-field">
+            <div class="num-display" data-role="display" aria-label="Wpisany numer"></div>
+          </div>
+          <div class="keypad" data-role="keypad"><!-- klawisze wstrzykiwane przez JS --></div>
+          <div class="dial-actions">
+            <button class="call-btn" data-role="call">
+              <svg width="38" height="38" viewBox="0 0 40 40" aria-hidden="true">
+                <path d="M11 5c2 0 3 1 4 4l1 4c.4 1.6 0 2.6-1 3.6l-2 2c1.6 3.4 4 5.8 7.4 7.4l2-2c1-1 2-1.4 3.6-1l4 1c3 1 4 2 4 4 0 4-3 7-7 7C18 39 1 22 1 12 1 8 4 5 8 5z" fill="#FFFFFF"/>
+              </svg>
+              <span>Zadzwoń</span>
+            </button>
+            <!-- Czerwony przycisk dwustanowy: pusto=Zablokuj, wpisane=Usuń -->
+            <button class="del-btn" data-role="redaction"></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- EKRAN 2: KONTAKTY (lista + IDENTYCZNY dialer-filtr) ---------- -->
+      <section class="screen" id="screen-contacts">
+        <div class="screen-title">Kontakty</div>
+        <div class="contacts-list" id="contacts-list"><!-- render JS --></div>
+
+        <!-- Dialer-filtr: ta sama klawiatura co na HOME, ale BEZ Zadzwoń.
+             Jeden czerwony przycisk pełnej szerokości: pusto=Klawiatura(→HOME), wpisane=Usuń. -->
+        <div class="dialer" data-dialer="contacts" data-mode="filter">
+          <div class="num-field filter-field">
+            <div class="num-display" data-role="display" aria-label="Filtr wyszukiwania"></div>
+          </div>
+          <div class="keypad" data-role="keypad"><!-- klawisze wstrzykiwane przez JS --></div>
+          <div class="dial-actions">
+            <button class="del-btn del-wide" data-role="redaction"></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- EKRAN 3: WIADOMOŚCI (skrzynka) ---------- -->
+      <section class="screen" id="screen-messages">
+        <div class="screen-title">Wiadomości</div>
+        <div class="messages-body">
+          <div class="inbox-list" id="inbox-list"><!-- render JS --></div>
+        </div>
+        <!-- Wielki czerwony przycisk Klawiatura → HOME -->
+        <button class="keyboard-btn" data-target="home">
+          <!-- Klawiatura TELEFONICZNA: 3 kolumny × 4 rzędy kropek (1-9, *0#) -->
+          <svg width="40" height="48" viewBox="0 0 44 56" aria-hidden="true" fill="#FFFFFF">
+            <circle cx="8"  cy="8"  r="5"/><circle cx="22" cy="8"  r="5"/><circle cx="36" cy="8"  r="5"/>
+            <circle cx="8"  cy="22" r="5"/><circle cx="22" cy="22" r="5"/><circle cx="36" cy="22" r="5"/>
+            <circle cx="8"  cy="36" r="5"/><circle cx="22" cy="36" r="5"/><circle cx="36" cy="36" r="5"/>
+            <circle cx="8"  cy="50" r="5"/><circle cx="22" cy="50" r="5"/><circle cx="36" cy="50" r="5"/>
+          </svg>
+          Powiadomienia
+        </button>
+      </section>
+
+      <!-- ---------- EKRAN 4: POJEDYNCZA WIADOMOŚĆ ---------- -->
+      <section class="screen" id="screen-message">
+        <div class="screen-title">Czytanie wiadomości</div>
+        <div class="message-body">
+          <div class="message-head">
+            <div class="avatar" id="message-avatar"></div>
+            <div class="message-from">
+              <div class="message-sender" id="message-sender"></div>
+              <div class="message-phone" id="message-phone"></div>
+              <div class="message-time" id="message-time"></div>
+            </div>
+          </div>
+          <!-- Załącznik MMS (zdjęcie) — widoczny tylko dla MMS -->
+          <div class="mms-attach" id="message-mms" hidden>
+            <div class="mms-photo" id="message-mms-photo"></div>
+            <div class="mms-label">Zdjęcie w wiadomości</div>
+          </div>
+          <div class="message-text" id="message-text"></div>
+        </div>
+        <div class="message-actions">
+          <button class="call-btn" id="message-call">
+            <svg width="38" height="38" viewBox="0 0 40 40" aria-hidden="true">
+              <path d="M11 5c2 0 3 1 4 4l1 4c.4 1.6 0 2.6-1 3.6l-2 2c1.6 3.4 4 5.8 7.4 7.4l2-2c1-1 2-1.4 3.6-1l4 1c3 1 4 2 4 4 0 4-3 7-7 7C18 39 1 22 1 12 1 8 4 5 8 5z" fill="#FFFFFF"/>
+            </svg>
+            <span>Zadzwoń</span>
+          </button>
+          <!-- Czerwony "Przeczytane" → wraca do skrzynki -->
+          <button class="read-btn" id="message-read" data-target="messages">Przeczytane</button>
+        </div>
+      </section>
+
+      <!-- ---------- EKRAN 5: OSTATNIE POŁĄCZENIA ---------- -->
+      <section class="screen" id="screen-calls">
+        <div class="screen-title">Połączenia</div>
+        <div class="calls-body">
+          <div class="calls-list" id="calls-list"><!-- render JS --></div>
+        </div>
+        <!-- Wielki czerwony przycisk Klawiatura → HOME -->
+        <button class="keyboard-btn" data-target="home">
+          <!-- Klawiatura TELEFONICZNA: 3 kolumny × 4 rzędy kropek (1-9, *0#) -->
+          <svg width="40" height="48" viewBox="0 0 44 56" aria-hidden="true" fill="#FFFFFF">
+            <circle cx="8"  cy="8"  r="5"/><circle cx="22" cy="8"  r="5"/><circle cx="36" cy="8"  r="5"/>
+            <circle cx="8"  cy="22" r="5"/><circle cx="22" cy="22" r="5"/><circle cx="36" cy="22" r="5"/>
+            <circle cx="8"  cy="36" r="5"/><circle cx="22" cy="36" r="5"/><circle cx="36" cy="36" r="5"/>
+            <circle cx="8"  cy="50" r="5"/><circle cx="22" cy="50" r="5"/><circle cx="36" cy="50" r="5"/>
+          </svg>
+          Powiadomienia
+        </button>
+      </section>
+
+      <!-- ---------- EKRAN: ROZMOWA (aktywne połączenie) ---------- -->
+      <section class="screen" id="screen-incall">
+        <div class="incall-top">
+          <div class="incall-avatar" id="incall-avatar"></div>
+          <div class="incall-name" id="incall-name"></div>
+          <div class="incall-phone" id="incall-phone"></div>
+          <div class="incall-status" id="incall-status">Trwa połączenie</div>
+          <div class="incall-timer" id="incall-timer">00:00</div>
+        </div>
+        <!-- Rząd przełączników: głośnomówiący + przełącz na wideo -->
+        <div class="incall-toggles">
+          <button class="ctrl-btn" id="speaker-btn" data-role="speaker">
+            <svg width="46" height="46" viewBox="0 0 60 60" aria-hidden="true">
+              <path d="M8 23h11l14-11v36L19 37H8z" fill="currentColor"/>
+              <g fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round">
+                <path d="M41 22c4 3 4 13 0 16"/><path d="M48 16c7 5 7 23 0 28"/>
+              </g>
+            </svg>
+            <span>Głośnik</span>
+          </button>
+          <button class="ctrl-btn" id="to-video-btn" data-role="to-video">
+            <svg width="46" height="40" viewBox="0 0 52 40" aria-hidden="true">
+              <rect x="2" y="6" width="34" height="28" rx="6" fill="currentColor"/>
+              <path d="M40 16l10-7v22l-10-7z" fill="currentColor"/>
+            </svg>
+            <span>Wideo</span>
+          </button>
+        </div>
+        <button class="hangup-btn" data-role="hangup">
+          <svg width="44" height="44" viewBox="0 0 40 40" aria-hidden="true">
+            <g transform="rotate(135 20 20)">
+              <path d="M11 5c2 0 3 1 4 4l1 4c.4 1.6 0 2.6-1 3.6l-2 2c1.6 3.4 4 5.8 7.4 7.4l2-2c1-1 2-1.4 3.6-1l4 1c3 1 4 2 4 4 0 4-3 7-7 7C18 39 1 22 1 12 1 8 4 5 8 5z" fill="#FFFFFF"/>
+            </g>
+          </svg>
+          <span>Rozłącz</span>
+        </button>
+      </section>
+
+      <!-- ---------- EKRAN: WIDEOROZMOWA ---------- -->
+      <section class="screen" id="screen-video">
+        <div class="video-remote" id="video-remote">
+          <div class="video-remote-avatar" id="video-remote-avatar"></div>
+          <div class="video-remote-name" id="video-remote-name"></div>
+          <div class="video-remote-phone" id="video-phone"></div>
+          <div class="video-remote-timer" id="video-timer">00:00</div>
+          <div class="video-remote-label">Obraz rozmówcy</div>
+        </div>
+        <div class="video-self">Ty</div>
+        <div class="video-bar">
+          <button class="ctrl-btn light" data-role="to-audio">
+            <svg width="46" height="46" viewBox="0 0 60 60" aria-hidden="true">
+              <path d="M11 5c2 0 3 1 4 4l1 4c.4 1.6 0 2.6-1 3.6l-2 2c2.4 5.1 6 8.7 11 11l2-2c1-1 2-1.4 3.6-1l4 1c3 1 4 2 4 4 0 6-5 11-11 11C18 47 5 26 5 14 5 8 8 5 11 5z" fill="currentColor"/>
+            </svg>
+            <span>Tylko głos</span>
+          </button>
+          <button class="hangup-btn video-hangup" data-role="hangup">
+            <svg width="44" height="44" viewBox="0 0 40 40" aria-hidden="true">
+              <g transform="rotate(135 20 20)">
+                <path d="M11 5c2 0 3 1 4 4l1 4c.4 1.6 0 2.6-1 3.6l-2 2c1.6 3.4 4 5.8 7.4 7.4l2-2c1-1 2-1.4 3.6-1l4 1c3 1 4 2 4 4 0 4-3 7-7 7C18 39 1 22 1 12 1 8 4 5 8 5z" fill="#FFFFFF"/>
+              </g>
+            </svg>
+            <span>Rozłącz</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ---------- EKRAN: POŁĄCZENIE PRZYCHODZĄCE (ktoś dzwoni teraz) ---------- -->
+      <section class="screen" id="screen-incoming">
+        <div class="incall-top">
+          <div class="incoming-label" id="incoming-label">Połączenie przychodzące</div>
+          <div class="incall-avatar ringing" id="incoming-avatar"></div>
+          <div class="incall-name" id="incoming-name"></div>
+          <div class="incoming-phone" id="incoming-phone"></div>
+        </div>
+        <div class="incoming-hint">Przeciągnij przycisk w górę</div>
+        <!-- Dla wideorozmowy: dodatkowy przycisk "Odbierz głosowo" — też przeciągany -->
+        <button class="answer-audio-btn answer-btn" id="answer-audio-btn" data-role="answer-audio" hidden>
+          <span class="swipe-arrow">▲</span>
+          <span class="ans-row">
+            <svg width="46" height="46" viewBox="0 0 40 40" aria-hidden="true">
+              <path d="M11 5c2 0 3 1 4 4l1 4c.4 1.6 0 2.6-1 3.6l-2 2c1.6 3.4 4 5.8 7.4 7.4l2-2c1-1 2-1.4 3.6-1l4 1c3 1 4 2 4 4 0 4-3 7-7 7C18 39 1 22 1 12 1 8 4 5 8 5z" fill="#FFFFFF"/>
+            </svg>
+            <span>Odbierz tylko głosowo</span>
+          </span>
+        </button>
+        <div class="incoming-actions">
+          <button class="answer-btn" data-role="answer">
+            <span class="swipe-arrow">▲</span>
+            <span class="ans-row">
+              <!-- ikona telefonu (audio) -->
+              <svg class="ans-ico-audio" width="48" height="48" viewBox="0 0 40 40" aria-hidden="true">
+                <path d="M11 5c2 0 3 1 4 4l1 4c.4 1.6 0 2.6-1 3.6l-2 2c1.6 3.4 4 5.8 7.4 7.4l2-2c1-1 2-1.4 3.6-1l4 1c3 1 4 2 4 4 0 4-3 7-7 7C18 39 1 22 1 12 1 8 4 5 8 5z" fill="#FFFFFF"/>
+              </svg>
+              <!-- ikona kamery (wideo) — pokazywana gdy wideorozmowa -->
+              <svg class="ans-ico-video" width="52" height="40" viewBox="0 0 52 40" aria-hidden="true" hidden>
+                <rect x="2" y="6" width="34" height="28" rx="6" fill="#FFFFFF"/>
+                <path d="M40 16l10-7v22l-10-7z" fill="#FFFFFF"/>
+              </svg>
+              <span id="answer-label">Odbierz</span>
+            </span>
+          </button>
+          <button class="decline-btn" data-role="decline">
+            <span class="swipe-arrow">▲</span>
+            <span class="ans-row">
+              <svg width="48" height="48" viewBox="0 0 40 40" aria-hidden="true">
+                <g transform="rotate(135 20 20)">
+                  <path d="M11 5c2 0 3 1 4 4l1 4c.4 1.6 0 2.6-1 3.6l-2 2c1.6 3.4 4 5.8 7.4 7.4l2-2c1-1 2-1.4 3.6-1l4 1c3 1 4 2 4 4 0 4-3 7-7 7C18 39 1 22 1 12 1 8 4 5 8 5z" fill="#FFFFFF"/>
+                </g>
+              </svg>
+              <span>Odrzuć</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ---------- EKRAN: OSTATNIE POŁĄCZENIA Z KONTAKTEM ---------- -->
+      <section class="screen" id="screen-contact-history">
+        <div class="screen-title" id="contact-history-title">Połączenia z kontaktem</div>
+        <div class="calls-body">
+          <div class="calls-list" id="contact-history-list"><!-- render JS --></div>
+        </div>
+        <button class="keyboard-btn" id="history-back-btn">
+          <svg width="32" height="32" viewBox="0 0 26 26" aria-hidden="true">
+            <path d="M16 4L7 13l9 9" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span id="history-back-label">Kontakty</span>
+        </button>
+      </section>
+
+      <!-- ---------- EKRAN 7: BLOKADA EKRANU (godzina/data są na górze w pasku) ---------- -->
+      <section class="screen" id="screen-lock">
+        <div class="lock-content">
+          <svg width="120" height="150" viewBox="0 0 80 100" aria-hidden="true">
+            <rect x="14" y="44" width="52" height="44" rx="8" fill="#FFFFFF"/>
+            <path d="M24 44V30a16 16 0 0 1 32 0v14" fill="none" stroke="#FFFFFF" stroke-width="7"/>
+            <circle cx="40" cy="62" r="6" fill="#1A1A1A"/>
+            <rect x="37" y="64" width="6" height="14" rx="3" fill="#1A1A1A"/>
+          </svg>
+          <div class="lock-arrow">▲</div>
+          <div class="lock-hint">Przeciągnij w górę,<br>aby odblokować</div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Overlay potwierdzenia połączenia -->
+    <div class="overlay hidden" id="call-confirm">
+      <div class="confirm-card">
+        <div id="confirm-text">Zadzwonić?</div>
+        <button class="call-btn" data-role="confirm-call">
+          <svg width="36" height="36" viewBox="0 0 40 40" aria-hidden="true">
+            <path d="M11 5c2 0 3 1 4 4l1 4c.4 1.6 0 2.6-1 3.6l-2 2c1.6 3.4 4 5.8 7.4 7.4l2-2c1-1 2-1.4 3.6-1l4 1c3 1 4 2 4 4 0 4-3 7-7 7C18 39 1 22 1 12 1 8 4 5 8 5z" fill="#FFFFFF"/>
+          </svg>
+          <span>Tak, zadzwoń</span>
+        </button>
+        <button class="video-call-btn" data-role="confirm-video">
+          <svg width="36" height="30" viewBox="0 0 52 40" aria-hidden="true">
+            <rect x="2" y="6" width="34" height="28" rx="6" fill="#FFFFFF"/>
+            <path d="M40 16l10-7v22l-10-7z" fill="#FFFFFF"/>
+          </svg>
+          <span>Zrób wideorozmowę</span>
+        </button>
+        <!-- Historia połączeń z tą osobą (tylko gdy znany kontakt) — NAD "Nie dzwoń",
+             DELIKATNY styl history-btn (BEZ zmiany stylu — tylko zamiana miejscami). -->
+        <button class="history-btn" data-role="show-history" hidden>Ostatnie połączenia z tą osobą</button>
+        <button class="cancel-btn" data-role="cancel">Nie dzwoń</button>
+      </div>
+    </div>
+
+  </div><!-- /device -->
+</div><!-- /stage -->
+
+<script src="app.js"></script>
+</body>
+</html>

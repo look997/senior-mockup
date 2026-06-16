@@ -1,0 +1,9 @@
+# Zależności (projekt jest vanilla — gdyby kiedyś doszły)
+node_modules/
+
+# Pliki systemowe / edytora
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*~

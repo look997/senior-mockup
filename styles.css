@@ -1,0 +1,1058 @@
+/* =========================================================================
+   Telefon Seniora — wysepkowy, taktylny styl ("fizyczne klawisze").
+   Bazowy układ sztywny 720x1604; .device skalowane przez --scale (JS).
+   ========================================================================= */
+
+:root {
+  /* Kolory */
+  --bg:        #F4F5F7;   /* tło wnętrza ekranu / wysepek nieaktywnych */
+  --surface:   #FFFFFF;   /* karty / wyspy */
+  --ink:       #1A1A1A;   /* tekst główny / obrysy */
+  --ink-soft:  #3A3F47;   /* tekst drugorzędny */
+  --muted:     #6B7280;   /* tekst pomocniczy */
+  --line:      #C8CCD2;   /* delikatne linie */
+  --green:     #157A36;   /* zadzwoń */
+  --green-d:   #0B3F1C;   /* cień zielonego */
+  --green-dk:  #0E5C28;   /* zielony wciśnięty */
+  --red:       #B71C1C;   /* rozłącz / nieodebrane / backspace */
+  --blue:      #0D47A1;   /* wiadomości */
+  --shadow-k:  #C4C8CE;   /* twardy cień klawisza */
+
+  /* Wymiary bazowe */
+  --frame-w: 720px;
+  --frame-h: 1604px;
+  --btn-h: 116px;        /* JEDNA wysokość wszystkich dolnych przycisków akcji */
+  --btn-radius: 34px;    /* wspólny, miękko zaokrąglony róg przycisków */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Ukryj paski przewijania — to ekran dotykowy. KLUCZOWE: dzięki temu lista
+   przewijana NIE rezerwuje miejsca na scrollbar, więc dialer pod nią ma
+   IDENTYCZNĄ szerokość jak na ekranie głównym (gdzie listy nie ma). */
+.contacts-list, .messages-body, .calls-body, .message-body, .inbox-list, .calls-list {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.contacts-list::-webkit-scrollbar,
+.messages-body::-webkit-scrollbar,
+.calls-body::-webkit-scrollbar,
+.message-body::-webkit-scrollbar,
+.inbox-list::-webkit-scrollbar,
+.calls-list::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Czarne tło hosta, centrowanie ramki. */
+.stage {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Ramka symulowanego urządzenia 720x1604, skalowana zmienną --scale (JS). */
+.device {
+  position: relative;
+  flex: none;
+  width: var(--frame-w);
+  height: var(--frame-h);
+  background: var(--bg);
+  border-radius: 56px;
+  overflow: hidden;
+  box-shadow: 0 0 0 6px #0A0A0A, 0 0 0 9px #2A2A2A;
+  transform: scale(var(--scale, 1));
+  transform-origin: center center;
+}
+
+/* Symulowane oczko aparatu (punch-hole). */
+.punch {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #060606;
+  box-shadow: inset 0 0 0 2px #222, 0 0 6px rgba(0,0,0,.7);
+  z-index: 60;
+}
+
+/* ===================== PASEK STATUSU ===================== */
+.status-bar {
+  height: 168px;
+  padding: 14px 30px 4px;        /* minimalny odstęp pod godziną/datą */
+  background: var(--surface);
+  border-bottom: 3px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+}
+/* Rząd wskaźników wokół oczka aparatu: zasięg | oczko | bateria */
+.status-indicators {
+  height: 48px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ind { display: flex; align-items: center; gap: 12px; }
+.ind-signal { justify-content: flex-start; }
+.ind-batt { justify-content: flex-end; }
+.ind-gap {
+  width: 70px; flex: none;
+  position: relative;
+}
+#batt-pct { font-size: 22px; font-weight: 800; color: var(--ink); }
+
+/* Pomarańczowa kropka nietypowych powiadomień — pozycjonowana względem RAMKI,
+   tuż na PRAWO od oczka aparatu (oczko: top:20 left:50% szer.30 → prawa krawędź 50%+15). */
+.notif-dot {
+  position: absolute;
+  top: 25px;
+  left: calc(50% + 28px);
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #F9A825;
+  box-shadow: 0 0 0 4px var(--surface), 0 2px 6px rgba(0,0,0,.4);
+  z-index: 61;                    /* nad oczkiem i paskiem statusu */
+}
+.notif-dot[hidden] { display: none; }
+
+/* Godzina (LEWA) + data (PRAWA), oba jak największe, tuż pod wskaźnikami */
+.status-clock {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;            /* dosuń do dołu — minimalny odstęp pod spodem */
+  justify-content: space-between;   /* godzina do lewej, data do prawej */
+  gap: 16px;
+  padding-bottom: 2px;
+}
+#clock {
+  font-size: 76px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  line-height: 1;
+  flex: none;
+}
+#date {
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--ink);
+  white-space: nowrap;
+  text-align: right;
+  flex: none;
+}
+
+/* ===================== EKRANY ===================== */
+main {
+  height: calc(var(--frame-h) - 168px);
+}
+.screen { display: none; height: 100%; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ---------- EKRAN HOME ---------- */
+/* Kafle wypełniają górę (rosną — brak luki), dialer przyklejony do dołu.
+   Bez bocznego paddingu ekranu — dialer ma własny padding identyczny jak w
+   Kontaktach, więc klawiatura ma TĘ SAMĄ szerokość na obu ekranach. */
+#screen-home { padding: 20px 0 0; position: relative; }
+
+.apps-grid {
+  flex: 1;            /* wypełnia całą przestrzeń nad dialerem — zero luki */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
+  gap: 16px;
+  min-height: 0;
+  margin: 0 20px;     /* boczny margines tylko dla kafli */
+}
+.app-tile {
+  height: 100%;       /* kafel rośnie z rzędem gridu i kurczy się, gdy jest popup */
+  min-height: 0;
+  overflow: hidden;
+  container-type: size;   /* by ikona mogła skalować się do wysokości kafla */
+  border-radius: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px 12px;   /* odstęp ikony/tekstu od krawędzi także przy małej wysokości */
+  position: relative;
+  border: 3px solid var(--ink);
+  background: var(--surface);
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  transition: transform .04s, box-shadow .04s;
+}
+/* Ikona skaluje się z wysokością kafla: ~40% wysokości, min 40px, max 80px.
+   Dzięki temu w skurczonym kaflu (gdy jest popup) ikona nie robi się malutka
+   nieproporcjonalnie, a w pełnym jest duża. */
+.app-tile svg { width: clamp(40px, 40cqh, 80px); height: clamp(40px, 40cqh, 80px); }
+.app-tile span { font-size: clamp(26px, 18cqh, 36px); font-weight: 800; }
+.tile-contacts { color: var(--ink); }
+.tile-messages { background: var(--blue); border-color: var(--blue); color: #FFF; box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.tile-calls { color: var(--ink); }
+.tile-mute { color: var(--ink); }
+/* Domyślnie (dźwięk wł): fale widoczne, przekreślenie ukryte */
+#mute-slash { display: none; }
+.tile-mute.muted #mute-waves { display: none; }   /* wyciszony: bez fal */
+.tile-mute.muted #mute-slash { display: inline; }  /* wyciszony: z przekreśleniem */
+.tile-mute.on { background: #FBE9E7; border-color: var(--red); box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.app-tile:active { box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.tile-messages:active { box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.tile-mute.on:active { box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+
+/* Oznaczenie liczby w rogu kafla (nieprzeczytane / nieodebrane) — okrągłe, czyste */
+.corner-badge {
+  position: absolute; top: 14px; right: 14px;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--red); color: #FFF;
+  font-size: 32px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+/* Na ciemnym kaflu (Wiadomości) obwódka dla kontrastu */
+.tile-messages .corner-badge { box-shadow: 0 0 0 4px var(--blue); }
+.tile-calls .corner-badge { box-shadow: 0 0 0 4px var(--surface); }
+.corner-badge[hidden] { display: none; }
+
+/* ---------- POPUP POWIADOMIEŃ (W PRZEPŁYWIE — ZMNIEJSZA kafle, nie zasłania) ----------
+   Karta wchodzi między kafle a dialer; grid kafli (flex:1) kurczy się robiąc
+   jej miejsce, więc kafle pozostają widoczne i klikalne. */
+.notif-stack {
+  flex: none;
+  margin: 14px 20px 0;
+  display: flex; flex-direction: column;
+}
+/* "Uśpione" dopasowanie czekające POD powiadomieniem — warstwa pod spodem
+   (niższy z-index), technicznie obecna, ale przykryta przez powiadomienie. */
+.notif-hint {
+  position: absolute;
+  left: 20px; right: 20px;
+  bottom: 790px;                 /* w tym samym obszarze co notif-stack, tuż nad dialerem */
+  z-index: 1;                    /* PONIŻEJ powiadomienia (notif-stack w przepływie) */
+  pointer-events: none;
+}
+.notif-hint[hidden] { display: none; }
+.notif-hint .notif-card { height: auto; min-height: 0; }
+.notif-stack:empty { display: none; margin: 0; }
+.notif-card {
+  background: var(--surface);
+  border: 5px solid var(--ink);
+  border-radius: 26px;
+  padding: 24px 26px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.22);
+  display: flex; flex-direction: column;
+  /* IDENTYCZNA wysokość niezależnie od typu (wiadomość / połączenie / dopasowanie) */
+  height: 360px;
+  justify-content: space-between;
+}
+/* Podgląd zawsze rezerwuje 2 wiersze, by połączenie i wiadomość miały tę samą strukturę */
+.notif-preview { min-height: 84px; }
+/* Karta dopasowania numeru bez przycisków — wyśrodkuj treść w tej samej wysokości */
+.notif-card.hint { justify-content: center; gap: 18px; }
+.notif-card.msg  { border-color: var(--blue); }
+.notif-card.call { border-color: var(--red); }
+.notif-head { display: flex; align-items: center; gap: 8px; }
+.notif-kind {
+  font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+}
+.notif-card.msg  .notif-kind { color: var(--blue); }
+.notif-card.call .notif-kind { color: var(--red); }
+.notif-time { font-size: 26px; font-weight: 700; color: var(--muted); }
+.notif-count { margin-left: auto; font-size: 26px; font-weight: 800; color: var(--muted); }
+.notif-from { font-size: 40px; font-weight: 800; color: var(--ink); }
+.notif-preview {
+  font-size: 32px; color: var(--ink-soft); line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.notif-actions { display: flex; gap: 14px; }
+.notif-actions button {
+  flex: 1; height: 104px;
+  border: none; border-radius: 20px;
+  font-size: 34px; font-weight: 800; color: #FFF;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: transform .04s, box-shadow .04s, background .04s;
+}
+/* Karta-podpowiedź dopasowania numeru do kontaktu (bez przycisków) */
+.notif-card.hint { border-color: var(--green); gap: 12px; }
+.notif-card.hint .notif-kind { color: var(--green); }
+.notif-card.hint .notif-from { display: flex; align-items: center; gap: 16px; }
+.hint-avatar {
+  width: 56px; height: 56px; flex: none;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #FFF; font-size: 26px; font-weight: 800;
+}
+
+.notif-green { background: var(--green); box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.notif-green:active { box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.notif-red { background: var(--red); box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.notif-red:active { box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+
+/* ---------- DIALER (WSPÓLNY, IDENTYCZNY: HOME = Kontakty) ----------
+   Przyklejony do dołu ekranu o stałej wysokości; treść nad nim (kafle/lista)
+   wypełnia resztę. Dzięki temu dialer jest identyczny i nigdy nieobcięty. */
+.dialer {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px 28px;
+  margin-top: 14px;
+}
+
+.num-field {
+  height: 96px;
+  background: var(--surface);
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  padding: 0 26px;
+}
+.num-display {
+  flex: 1;
+  font-size: 48px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+  color: var(--ink);
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: left;
+  direction: ltr;          /* numer od lewej (nie odwracać sformatowanych grup) */
+}
+.num-display:empty::before {
+  content: "Wpisz numer";
+  color: var(--line);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+/* Pole filtra (Kontakty): litery od lewej + inna podpowiedź */
+.filter-field .num-display {
+  direction: ltr;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.filter-field .num-display:empty::before {
+  content: "Wpisz, aby wyszukać";
+  text-transform: none;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+/* Klawisz: cyfra + litery, całość wyrównana do LEWEJ (nie wyśrodkowana). */
+.key {
+  height: 112px;
+  background: var(--surface);
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;   /* DO LEWEJ */
+  gap: 12px;
+  padding-left: 30px;
+  transition: transform .04s, box-shadow .04s, background .04s;
+}
+.kdigit { font-size: 52px; font-weight: 800; color: var(--ink); line-height: 1; }
+.kletters {
+  font-size: 38px; font-weight: 800; color: var(--ink-soft);
+  line-height: 1; letter-spacing: 0.5px;
+}
+.kletters:empty { display: none; }
+/* Na HOME (dialer telefoniczny) litery zbędne — ukryj bez zmiany layoutu. */
+#screen-home .kletters { visibility: hidden; }
+/* Awatar ulubionego na klawiszu 1,2,3… (tylko HOME) — po prawej stronie klawisza. */
+/* Awatar ulubionego — duży, wypełnia klawisz z lekkim marginesem.
+   Zaokrąglenie SPÓJNE z klawiszem (klawisz 30px, awatar wsunięty o 10px → 22px). */
+.key-fav {
+  position: absolute; right: 10px; top: 10px; bottom: 10px;
+  width: auto; aspect-ratio: 1 / 1;
+  border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  color: #FFF; font-size: 34px; font-weight: 800;
+}
+@supports (corner-shape: superellipse(1)) {
+  .key-fav { corner-shape: superellipse(1); }   /* ten sam miękki kształt co klawisz */
+}
+.key:active {
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  background: #E8EAED;
+}
+/* Mała ikonka latarki na klawiszu 0 (przytrzymaj = latarka) */
+.key-zero { position: relative; }
+.key-flash {
+  position: absolute; right: 12px; bottom: 8px;
+  color: var(--muted);
+}
+.key-zero.flash-active .key-flash { color: #F9A825; }
+
+.call-btn {
+  height: var(--btn-h);
+  background: var(--green);
+  border: none;
+  border-radius: 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  color: #FFF; font-size: 34px; font-weight: 800;
+  transition: transform .04s, box-shadow .04s, background .04s;
+}
+.call-btn:active {
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  background: var(--green-dk);
+}
+
+/* Rząd akcji dialera: zielony Zadzwoń (szeroki) + czerwony przycisk (wąski) */
+.dial-actions { display: flex; gap: 14px; }
+.dial-actions .call-btn { flex: 1; height: var(--btn-h); font-size: 32px; }
+.del-btn {
+  flex: 0 0 200px;
+  height: var(--btn-h);
+  background: var(--red);
+  border: none;
+  border-radius: 22px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  color: #FFF; font-size: 28px; font-weight: 800;
+  transition: transform .04s, box-shadow .04s, background .04s;
+}
+.del-btn svg { flex: none; }
+.del-btn:active {
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  background: #8E1515;
+}
+/* Pełna szerokość — Kontakty mają tylko ten jeden przycisk (Klawiatura/Usuń). */
+.del-wide { flex: 1 1 auto; }
+
+/* Miganie pola "Wpisz numer" gdy Zadzwoń bez numeru */
+@keyframes fieldFlash {
+  0%, 100% { background: var(--surface); border-color: var(--ink); }
+  25%, 75% { background: #FFE3E3; border-color: var(--red); }
+}
+.num-field.flash { animation: fieldFlash .5s ease 2; }
+
+/* ---------- NAGŁÓWEK EKRANU (tytuł, bez przycisku Cofnij) ---------- */
+.screen-title {
+  flex: none;
+  height: 88px;
+  background: var(--surface);
+  border-bottom: 3px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; font-weight: 800; color: var(--ink);
+}
+
+/* ---------- EKRAN KONTAKTY ---------- */
+#screen-contacts { background: var(--bg); }
+.contacts-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.contact-card {
+  flex: none;
+  min-height: 128px;
+  background: var(--surface);
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  display: flex; align-items: center; padding: 18px 20px;
+  text-align: left;
+}
+.contact-card:active { background: #F0F2F4; }
+.avatar {
+  position: relative;
+  width: 84px; height: 84px; flex: none;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #FFF; font-size: 38px; font-weight: 800;
+}
+.av-blue { background: var(--blue); }
+.av-green { background: var(--green); }
+.av-red { background: var(--red); }
+.av-purple { background: #6A1B9A; }
+.av-gray { background: #6B7280; }   /* numer spoza kontaktów */
+/* Gwiazdka ulubionego w rogu awatara (zamiast osobnej sekcji) */
+.av-fav-star {
+  position: absolute; top: -8px; right: -8px;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: #F9A825; color: #FFF;
+  font-size: 24px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 3px var(--surface);
+}
+.contact-name { flex: 1; margin-left: 18px; font-size: 36px; font-weight: 800; color: var(--ink); }
+/* Litery/cyfry pasujące do wpisanego ciągu — inny ODCIEŃ (zielony akcent),
+   bez pogrubiania (dziedziczy font-weight). Subtelne tło dla czytelności. */
+.match {
+  color: var(--green);
+  background: rgba(21, 122, 54, 0.12);
+  border-radius: 4px;
+  padding: 0 1px;
+}
+.contact-call { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: none; }
+.contact-call .ico {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--green);
+  display: flex; align-items: center; justify-content: center;
+}
+.contact-call small { font-size: 17px; font-weight: 800; color: var(--green); }
+/* Lista kontaktów: dialer pod nią jest tym SAMYM komponentem co na HOME,
+   więc na obu ekranach wygląda i leży identycznie (przyklejony do dołu). */
+.dialer { border-top: 3px solid var(--line); }
+/* Nagłówek sekcji w kontaktach (Ulubione / Wszystkie) */
+.contacts-section {
+  font-size: 26px; font-weight: 800; color: var(--muted);
+  padding: 6px 4px 2px; letter-spacing: 1px;
+}
+.fav-star { color: #F9A825; margin-right: 8px; }
+
+/* ---------- EKRAN WIADOMOŚCI (skrzynka) ---------- */
+#screen-messages { background: var(--bg); }
+.messages-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.inbox-list { display: flex; flex-direction: column; gap: 16px; }
+
+.msg-card {
+  position: relative;
+  min-height: 140px;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 20px 70px 20px 26px;
+}
+.msg-card:active { background: #F0F2F4; }
+.msg-card.read { border: 3px solid var(--line); }
+.msg-card.unread { border: 4px solid var(--blue); border-left-width: 12px; }
+.msg-sender { font-size: 38px; font-weight: 800; color: var(--ink); }
+.msg-card.read .msg-sender { font-weight: 700; }
+.msg-preview {
+  font-size: 30px; color: var(--ink-soft); margin-top: 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 540px;
+}
+.msg-time { position: absolute; top: 20px; right: 24px; font-size: 24px; color: var(--muted); }
+/* Oznaczenie nieprzeczytanej w rogu karty wiadomości */
+.msg-card .card-corner { background: var(--blue); }
+/* Znaczek MMS: niebieski gdy nieprzeczytane, szary gdy przeczytane */
+.msg-mms-tag { font-size: 28px; font-weight: 800; margin-right: 8px; }
+.msg-card.unread .msg-mms-tag { color: var(--blue); }
+.msg-card.read .msg-mms-tag { color: var(--muted); }
+
+/* Wyraźny odstęp + etykieta oddzielająca przeczytane od nieprzeczytanych */
+.inbox-divider {
+  margin: 14px 0 4px;
+  font-size: 26px; font-weight: 800; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  border-top: 3px dashed var(--line);
+  padding-top: 18px;
+}
+/* Gdy etykieta jest pierwsza (brak grupy nad nią) — bez górnej linii/marginesu */
+.inbox-divider.first { margin-top: 0; border-top: none; padding-top: 4px; }
+
+/* ---------- EKRAN POJEDYNCZEJ WIADOMOŚCI ---------- */
+#screen-message { background: var(--bg); }
+.message-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 22px;
+}
+.message-head { display: flex; align-items: center; gap: 18px; }
+.message-from { display: flex; flex-direction: column; }
+.message-sender { font-size: 34px; font-weight: 800; color: var(--ink); }
+.message-phone { font-size: 26px; font-weight: 700; color: var(--ink-soft); margin-top: 2px; }
+.message-time { font-size: 22px; color: var(--muted); margin-top: 2px; }
+.message-text {
+  background: var(--surface);
+  border: 3px solid var(--line);
+  border-radius: 24px;
+  padding: 26px;
+  font-size: 32px; line-height: 1.4; color: var(--ink);
+}
+/* Załącznik MMS (zdjęcie) */
+.mms-attach[hidden] { display: none; }
+.mms-attach {
+  background: var(--surface);
+  border: 3px solid var(--line);
+  border-radius: 24px;
+  padding: 18px;
+  display: flex; flex-direction: column; gap: 12px; align-items: center;
+}
+.mms-photo {
+  width: 100%; height: 280px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #6A1B9A, #0D47A1 60%, #157A36);
+  position: relative; overflow: hidden;
+}
+.mms-photo::after {
+  content: "📷";
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 96px; opacity: .85;
+}
+.mms-label { font-size: 24px; font-weight: 700; color: var(--ink-soft); }
+.message-actions {
+  flex: none;
+  display: flex; gap: 16px;
+  margin: 16px 24px 28px;         /* margines (nie padding) — kończy się na tej samej
+                                     wysokości co inne dolne przyciski */
+}
+.message-actions .call-btn { flex: 1; height: var(--btn-h); font-size: 34px; }
+/* Czerwony "Przeczytane" — identyczna wysokość/styl jak inne przyciski akcji */
+.read-btn {
+  flex: 0 0 300px;
+  height: var(--btn-h);
+  background: var(--red);
+  border: none;
+  border-radius: 24px;
+  font-size: 34px; font-weight: 800; color: #FFF;
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  transition: transform .04s, box-shadow .04s, background .04s;
+}
+.read-btn:active {
+  box-shadow: 0 2px 6px rgba(0,0,0,.10); background: #8E1515;
+}
+
+/* ---------- EKRAN OSTATNICH POŁĄCZEŃ ---------- */
+#screen-calls { background: var(--bg); }
+.calls-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px;
+}
+.calls-list { display: flex; flex-direction: column; gap: 18px; }
+.call-card {
+  position: relative;
+  min-height: 140px;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 3px solid var(--line);
+  border-radius: 24px;
+  display: flex; align-items: center; padding: 18px 24px; gap: 18px;
+}
+.call-card.missed { border-color: var(--red); border-width: 4px; }
+.call-card:active { background: #F0F2F4; }
+.call-card .call-ico { flex: none; width: 54px; height: 54px; }
+.call-info { display: flex; flex-direction: column; }
+.call-name { font-size: 38px; font-weight: 800; color: var(--ink); }
+.call-card.missed .call-name { color: var(--red); }
+.call-dir-label { font-size: 28px; font-weight: 700; margin-top: 4px; }
+.dir-missed { color: var(--red); }
+.dir-in { color: var(--green); }
+.dir-out { color: var(--blue); }
+.call-dur { font-weight: 700; color: var(--muted); }
+.call-time { margin-left: auto; font-size: 26px; font-weight: 700; color: var(--muted); align-self: center; white-space: nowrap; }
+
+/* Oznaczenie nieodebranego w rogu karty połączenia */
+.card-corner {
+  position: absolute; top: -12px; right: -12px;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--red); border: 4px solid var(--bg);
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+}
+
+/* ---------- EKRAN ROZMOWY (aktywne połączenie) ---------- */
+#screen-incall { background: var(--bg); }
+.incall-top {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px;
+  width: 100%;
+}
+.incall-avatar {
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #FFF; font-size: 84px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.incall-name { font-size: 48px; font-weight: 800; color: var(--ink); text-align: center; padding: 0 24px; }
+.incall-phone { font-size: 30px; font-weight: 700; color: var(--ink-soft); }
+.incall-status { font-size: 30px; color: var(--muted); }
+.incall-timer { font-size: 56px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* Przełączniki w rozmowie: głośnik + wideo */
+.incall-toggles {
+  flex: none;
+  display: flex; gap: 18px;
+  margin: 0 24px 28px;
+}
+.ctrl-btn {
+  flex: 1; height: var(--btn-h);
+  background: var(--surface);
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  font-size: 26px; font-weight: 800; color: var(--ink);
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  transition: transform .04s, box-shadow .04s, background .04s;
+}
+.ctrl-btn:active { box-shadow: 0 2px 6px rgba(0,0,0,.10); background: #E8EAED; }
+.ctrl-btn.on { background: #157A36; border-color: #0B3F1C; color: #FFF; box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.ctrl-btn.light { background: var(--surface); border-color: var(--ink); color: var(--ink); }
+
+.hangup-btn {
+  flex: none;
+  margin: 0 24px 28px;
+  width: calc(100% - 48px);
+  height: var(--btn-h);
+  background: var(--red);
+  border: none;
+  border-radius: 28px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  color: #FFF; font-size: 38px; font-weight: 800;
+  transition: transform .04s, box-shadow .04s, background .04s;
+}
+.hangup-btn:active {
+  box-shadow: 0 2px 6px rgba(0,0,0,.10); background: #8E1515;
+}
+
+/* ---------- EKRAN POŁĄCZENIA PRZYCHODZĄCEGO ---------- */
+#screen-incoming { background: var(--bg); }
+.incoming-label {
+  font-size: 32px; font-weight: 800; color: var(--green);
+  text-transform: uppercase; letter-spacing: 1px; text-align: center;
+}
+.incoming-phone { font-size: 32px; font-weight: 700; color: var(--ink-soft); }
+.incall-avatar.ringing { animation: ring 1s ease-in-out infinite; }
+@keyframes ring {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(21,122,54,.5); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 22px rgba(21,122,54,0); }
+}
+/* Duże przyciski Odbierz/Odrzuć — przeciągane w górę (gest) */
+.incoming-hint {
+  flex: none; text-align: center;
+  font-size: 26px; font-weight: 700; color: var(--muted);
+  margin-bottom: 12px;
+}
+.incoming-actions {
+  flex: none;
+  display: flex; gap: 20px;
+  margin: 0 24px 28px;
+}
+.answer-btn, .decline-btn {
+  flex: 1; height: var(--btn-h);
+  border: none; border-radius: 28px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  color: #FFF; font-size: 36px; font-weight: 800;
+  touch-action: none;          /* by przeciąganie nie scrollowało */
+  will-change: transform, opacity;
+}
+.answer-btn.dragging, .decline-btn.dragging { transition: none; }
+.answer-btn:not(.dragging), .decline-btn:not(.dragging) { transition: transform .2s, opacity .2s; }
+.swipe-arrow { font-size: 30px; line-height: 1; opacity: .85; }
+/* Strzałka NAD rzędem [ikona z lewej + napis z prawej] — niższy układ
+   (2 poziomy zamiast 3), bez zmiany wysokości/pozycji samego przycisku. */
+.ans-row { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 16px; }
+.answer-btn { background: var(--green); box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.answer-btn:active { box-shadow: 0 2px 6px rgba(0,0,0,.10); background: var(--green-dk); }
+.decline-btn { background: var(--red); box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+.decline-btn:active { box-shadow: 0 2px 6px rgba(0,0,0,.10); background: #8E1515; }
+/* Dodatkowy przycisk "Odbierz tylko głosowo" (dla wideorozmowy) */
+/* "Odbierz tylko głosowo" — pełna szerokość, zielony, przeciągany (ma też .answer-btn) */
+.answer-audio-btn {
+  flex: none !important;              /* stała wysokość, nie rozpycha się */
+  margin: 0 24px 28px;
+  height: var(--btn-h) !important;
+  flex-direction: column !important;  /* strzałka NAD rzędem [ikona + tekst] */
+  gap: 6px;
+  background: #2E8B4F;                 /* nieco jaśniejszy zielony, by odróżnić */
+  font-size: 30px;
+}
+.answer-audio-btn .ans-row { gap: 14px; }   /* odstęp ikona↔napis w rzędzie */
+.answer-audio-btn svg { width: 40px; height: 40px; }
+.answer-audio-btn .swipe-arrow { font-size: 24px; }
+.answer-audio-btn[hidden] { display: none; }
+/* Dwie ikony Odbierz (audio/wideo) */
+.ans-ico-audio[hidden], .ans-ico-video[hidden] { display: none; }
+
+/* ---------- EKRAN WIDEOROZMOWY ---------- */
+#screen-video { background: #0A0A0A; position: relative; }
+.video-remote {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  background: linear-gradient(160deg, #1a2330, #0A0A0A);
+}
+.video-remote-avatar {
+  width: 220px; height: 220px; border-radius: 50%;
+  background: var(--blue); color: #FFF; font-size: 90px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.video-remote-name { font-size: 44px; font-weight: 800; color: #FFF; }
+.video-remote-phone { font-size: 28px; font-weight: 700; color: #c0c8d2; }
+.video-remote-timer { font-size: 40px; font-weight: 800; color: #FFF; font-variant-numeric: tabular-nums; }
+.video-remote-label { font-size: 24px; color: #9aa3ad; }
+.video-self {
+  position: absolute; top: 24px; right: 24px;
+  width: 150px; height: 210px;
+  border-radius: 18px;
+  background: #2a3340; border: 3px solid #4a5564;
+  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12px;
+  color: #cbd2da; font-size: 26px; font-weight: 700;
+}
+.video-bar {
+  flex: none;
+  display: flex; gap: 18px;
+  margin: 0 24px 28px;
+  align-items: stretch;            /* oba przyciski tej samej wysokości */
+}
+/* Oba przyciski w rzędzie wideo: identyczna wysokość, bez "podniesionego dna" */
+.video-bar .ctrl-btn {
+  flex: 0 0 240px;
+  height: var(--btn-h);
+  box-shadow: none;                /* bez twardego cienia 3D — równe dno */
+  border-radius: 28px;
+}
+.video-bar .ctrl-btn:active { transform: none; box-shadow: none; background: #E8EAED; }
+.video-bar .hangup-btn { flex: 1; height: var(--btn-h); margin: 0; width: auto; box-shadow: none; }
+.video-bar .hangup-btn:active { transform: none; box-shadow: none; background: #8E1515; }
+
+/* ---------- OVERLAY POTWIERDZENIA ---------- */
+.overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 70;
+}
+.overlay.hidden { display: none; }
+.confirm-card {
+  width: 580px;
+  background: var(--surface);
+  border: 3px solid var(--ink);
+  border-radius: 30px;
+  padding: 40px;
+  display: flex; flex-direction: column; gap: 22px;
+}
+#confirm-text { font-size: 32px; font-weight: 700; color: var(--ink); text-align: center; line-height: 1.3; }
+#confirm-text b { font-size: 44px; font-weight: 800; display: inline-block; margin: 6px 0; }   /* większa nazwa */
+.confirm-phone { font-size: 36px; font-weight: 700; color: var(--ink-soft); }                  /* większy numer */
+.confirm-card .call-btn { height: var(--btn-h); font-size: 30px; }
+/* Niebieski przycisk wideorozmowy w potwierdzeniu */
+.video-call-btn {
+  height: var(--btn-h);
+  background: var(--blue);
+  border: none; border-radius: 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  color: #FFF; font-size: 30px; font-weight: 800;
+  transition: transform .04s, box-shadow .04s, background .04s;
+}
+.video-call-btn:active { box-shadow: 0 2px 6px rgba(0,0,0,.10); background: #0b3a82; }
+.cancel-btn {
+  height: var(--btn-h);
+  background: var(--surface);
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  font-size: 30px; font-weight: 800; color: var(--ink);
+}
+.cancel-btn:active { background: #E8EAED; }
+/* Dodatkowa pozycja w potwierdzeniu: historia połączeń z osobą */
+.history-btn {
+  height: var(--btn-h);
+  background: transparent;
+  border: 3px solid var(--line);
+  border-radius: 22px;
+  font-size: 26px; font-weight: 700; color: var(--ink-soft);
+}
+.history-btn[hidden] { display: none; }
+.history-btn:active { background: rgba(0,0,0,.05); }
+
+/* ---------- CZERWONY PRZYCISK "KLAWIATURA" (dół ekranów listowych) ----------
+   Ta sama wysokość (112px) co przyciski Zadzwoń / Przeczytane / Usuń. */
+.keyboard-btn {
+  flex: none;
+  margin: 16px 24px 28px;
+  height: var(--btn-h);
+  background: var(--red);
+  border: none;
+  border-radius: 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.10);
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+  font-size: 34px; font-weight: 800; color: #FFF;
+  transition: transform .04s, box-shadow .04s, background .04s;
+}
+.keyboard-btn:active {
+  box-shadow: 0 2px 6px rgba(0,0,0,.10); background: #8E1515;
+}
+
+/* ---------- EKRAN BLOKADY (godzina/data są na górze w pasku statusu) ---------- */
+#screen-lock { background: #15171b; }   /* ten sam ciemny co pasek na blokadzie */
+.lock-content {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 28px; width: 100%; padding: 0 40px;
+}
+.lock-arrow {
+  font-size: 56px; color: #FFF; opacity: .8;
+  animation: lockArrow 1.6s ease-in-out infinite;
+}
+@keyframes lockArrow {
+  0%, 100% { transform: translateY(6px); opacity: .5; }
+  50% { transform: translateY(-6px); opacity: .9; }
+}
+.lock-hint {
+  font-size: 60px; font-weight: 800; color: #FFF; text-align: center; line-height: 1.2;
+}
+/* Gdy ekran zablokowany — pasek statusu też ciemny (dopasowany do tła blokady) */
+/* Ekran blokady i pasek statusu mają TO SAMO ciemne tło (#15171b) — spójnie,
+   bez szwu. W trybie JASNYM pasek przechodzi na ciemno (html.locked); w trybie
+   CIEMNYM nie trzeba nic nadpisywać, bo wszystko jest już ciemne i spójne. */
+html.locked:not(.dark) .status-bar { background: #15171b; border-bottom-color: #2A2D33; }
+html.locked:not(.dark) #clock,
+html.locked:not(.dark) #date,
+html.locked:not(.dark) #batt-pct { color: #FFF; }
+html.locked:not(.dark) .status-indicators svg [fill="#1A1A1A"] { fill: #FFF; }
+html.locked:not(.dark) .status-indicators svg [stroke="#1A1A1A"] { stroke: #FFF; }
+html.locked:not(.dark) .status-indicators svg [fill="#C8CCD2"] { fill: #555; }
+
+/* ---------- TRYB CIEMNY (przytrzymaj strefę zasięgu) ---------- */
+html.dark {
+  --bg: #0F1216;          /* tło ekranów */
+  --surface: #1C2127;     /* karty / kafle / klawisze */
+  --ink: #F2F4F7;         /* tekst główny */
+  --ink-soft: #B9C0C9;    /* tekst drugorzędny */
+  --muted: #828A94;       /* tekst pomocniczy */
+  --line: #353B44;        /* obrysy delikatne */
+  --shadow-k: #05070A;    /* cień klawiszy */
+}
+html.dark, html.dark body { background: #000; }
+html.dark .device { background: var(--bg); }
+/* W trybie ciemnym obrysy kafli/klawiszy/przycisków/pól NIE białe — miękki szary,
+   inaczej kontrast jest zbyt ostry i brzydki. */
+html.dark .app-tile,
+html.dark .key,
+html.dark .num-field,
+html.dark .ctrl-btn,
+html.dark .contact-card,
+html.dark .call-card,
+html.dark .history-btn,
+html.dark .cancel-btn { border-color: #3A4049; }
+html.dark .status-bar,
+html.dark .screen-title { border-bottom-color: #2A2F36; }
+/* Paski/tytuły */
+html.dark .status-bar,
+html.dark .screen-title { background: var(--surface); }
+/* Wszystkie powierzchnie kart, klawiszy, kafli, pól */
+html.dark .num-field,
+html.dark .key,
+html.dark .app-tile,
+html.dark .contact-card,
+html.dark .msg-card,
+html.dark .call-card,
+html.dark .message-text,
+html.dark .mms-attach,
+html.dark .confirm-card,
+html.dark .ctrl-btn,
+html.dark .incall-avatar,
+html.dark .neutral-btn,
+html.dark .notif-card { background: var(--surface); }
+/* Ekrany połączeń/rozmowy/blokady */
+html.dark #screen-incall,
+html.dark #screen-incoming { background: var(--bg); }
+html.dark .incall-name,
+html.dark .incall-timer { color: var(--ink); }
+/* W trybie ciemnym blokada = ten sam kolor co ciemny pasek statusu (spójność, bez szwu). */
+/* W trybie ciemnym ekran blokady i pasek statusu mają IDENTYCZNE tło
+   (kolor paska = var(--surface)), żeby NIE było szwu między nimi. */
+html.dark #screen-lock { background: var(--surface); }
+/* Kafel Wiadomości w trybie ciemnym: ciemniejszy niebieski + jasna (biała) ikona koperty */
+html.dark .tile-messages { background: #16315c; border-color: #16315c; box-shadow: 0 2px 6px rgba(0,0,0,.10); }
+html.dark .tile-messages svg [fill="#FFFFFF"] { fill: #FFFFFF; }     /* koperta biała */
+html.dark .tile-messages svg [stroke="#0D47A1"] { stroke: #16315c; } /* linia koperty pod tło */
+html.dark .tile-mute.muted { background: #3a1f1f; }
+/* Miganie pola "Wpisz numer" — wariant na ciemny motyw */
+html.dark .num-field.flash { animation: fieldFlashDark .5s ease 2; }
+@keyframes fieldFlashDark {
+  0%, 100% { background: var(--surface); border-color: var(--ink); }
+  25%, 75% { background: #4a1f1f; border-color: #ff6b6b; }
+}
+/* Placeholdery pól (Wpisz numer / Wpisz, aby wyszukać) — wyraźniejsze na ciemnym */
+html.dark .num-display:empty::before { color: #6b7480; }
+/* Kolory funkcyjne tekstu — jaśniejsze warianty, by były czytelne na ciemnym tle */
+html.dark .notif-card.msg .notif-kind { color: #5b9bff; }
+html.dark .notif-card.call .notif-kind { color: #ff6b6b; }
+html.dark .dir-missed, html.dark .call-card.missed .call-name { color: #ff6b6b; }
+html.dark .dir-out { color: #5b9bff; }
+html.dark .dir-in { color: #4ec77a; }
+/* Pasujące litery/cyfry w trybie ciemnym — jaśniejszy zielony (jak .dir-in) */
+html.dark .match { color: #4ec77a; background: rgba(78, 199, 122, 0.16); }
+/* [MMS] czytelny na ciemnym — jaśniejszy niebieski (ta sama specyficzność co reguły bazowe) */
+html.dark .msg-card.unread .msg-mms-tag { color: #6aa8ff; }
+html.dark .msg-card.read .msg-mms-tag { color: #9aa3ad; }
+html.dark .msg-card.unread { border-color: #2f6bd6; }
+html.dark .msg-card .card-corner { background: #2f6bd6; }
+/* Wszystkie czarne wypełnienia/obrysy ikon SVG → jasne (zasięg, bateria, ikony kafli) */
+html.dark svg [fill="#1A1A1A"] { fill: var(--ink); }
+html.dark svg [stroke="#1A1A1A"] { stroke: var(--ink); }
+html.dark svg [fill="#FFFFFF"] { fill: var(--ink); }   /* np. wnętrze koperty na jasnym tle */
+/* ALE koperta na NIEBIESKIM kaflu Wiadomości ma zostać BIAŁA (kontrast). */
+html.dark .tile-messages svg [fill="#FFFFFF"] { fill: #FFFFFF; }
+html.dark .tile-messages svg [stroke="#0D47A1"] { stroke: #16315c; }
+/* Stany :active na ciemno */
+html.dark .key:active,
+html.dark .back-btn:active,
+html.dark .contact-card:active,
+html.dark .msg-card:active,
+html.dark .call-card:active,
+html.dark .ctrl-btn:active,
+html.dark .neutral-btn:active { background: #2A313A; }
+/* Bateria: ramka jasna */
+html.dark .ico-batt rect[stroke="#1A1A1A"] { stroke: var(--ink); }
+
+/* =========================================================================
+   SUPERELLIPSE (squircle) — przyjemniejsze zaokrąglenie prostokątnych
+   przycisków, klawiszy, kafli i kart. Progresywne ulepszenie: tylko gdy
+   przeglądarka wspiera corner-shape. ŚWIADOMIE bez ramki powiadomienia
+   (.notif-card) — tam zostaje zwykłe zaokrąglenie.
+   ========================================================================= */
+/* Miękko zaokrąglone, nowoczesne rogi przycisków i klawiszy — DUŻE promienie
+   (działają wszędzie). corner-shape:superellipse(1) tylko delikatnie wygładza. */
+.key { border-radius: 30px; }
+.call-btn, .del-btn, .read-btn, .keyboard-btn, .video-call-btn,
+.answer-btn, .decline-btn, .hangup-btn, .answer-audio-btn,
+.cancel-btn, .history-btn, .ctrl-btn, .neutral-btn, .back-red-btn {
+  border-radius: var(--btn-radius);
+}
+.app-tile { border-radius: 36px; }
+/* superellipse(): NIŻSZY parametr = pełniej zaokrąglony. 1 = gładkie, miękkie rogi. */
+@supports (corner-shape: superellipse(1)) {
+  .app-tile, .key,
+  .call-btn, .del-btn, .keyboard-btn, .read-btn, .cancel-btn,
+  .video-call-btn, .neutral-btn, .history-btn, .back-red-btn,
+  .ctrl-btn, .answer-btn, .decline-btn, .hangup-btn, .answer-audio-btn,
+  .num-field, .contact-card, .msg-card, .call-card, .message-text,
+  .mms-attach, .confirm-card, .screen-title, .video-self {
+    corner-shape: superellipse(1);
+  }
+}
