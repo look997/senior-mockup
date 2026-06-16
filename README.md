@@ -15,13 +15,17 @@ Czysty **vanilla HTML/CSS/JS**, bez frameworków i zależności.
 
 ## Galeria
 
-| Główny | Kontakty | Wiadomości |
+| Główny | Główny (bez powiadomień) | Kontakty |
 |:---:|:---:|:---:|
-| ![Główny](screenshots/01-home.png) | ![Kontakty](screenshots/02-kontakty.png) | ![Wiadomości](screenshots/03-wiadomosci.png) |
-| **Czytanie wiadomości** | **Połączenia** | **Połączenie przychodzące** |
-| ![Czytanie wiadomości](screenshots/04-wiadomosc.png) | ![Połączenia](screenshots/05-polaczenia.png) | ![Przychodzące](screenshots/06-przychodzace.png) |
-| **Rozmowa** | **Potwierdzenie dzwonienia** | **Tryb ciemny** |
-| ![Rozmowa](screenshots/07-rozmowa.png) | ![Potwierdzenie](screenshots/08-potwierdzenie.png) | ![Tryb ciemny](screenshots/09-ciemny.png) |
+| ![Główny](screenshots/01-home.png) | ![Główny bez powiadomień](screenshots/02-home-bez-powiadomien.png) | ![Kontakty](screenshots/03-kontakty.png) |
+| **Wiadomości** | **Czytanie wiadomości** | **Połączenia** |
+| ![Wiadomości](screenshots/04-wiadomosci.png) | ![Czytanie wiadomości](screenshots/05-wiadomosc.png) | ![Połączenia](screenshots/06-polaczenia.png) |
+| **Ostatnie połączenia z tą osobą** | **Połączenie przychodzące** | **Rozmowa** |
+| ![Ostatnie połączenia z tą osobą](screenshots/07-ostatnie.png) | ![Połączenie przychodzące](screenshots/08-przychodzace.png) | ![Rozmowa](screenshots/09-rozmowa.png) |
+| **Wideorozmowa** | **Potwierdzenie połączenia** | **Blokada ekranu** |
+| ![Wideorozmowa](screenshots/10-wideorozmowa.png) | ![Potwierdzenie połączenia](screenshots/11-potwierdzenie.png) | ![Blokada ekranu](screenshots/12-blokada.png) |
+| **Tryb ciemny** | | |
+| ![Tryb ciemny](screenshots/13-ciemny.png) | | |
 
 ---
 
@@ -36,7 +40,7 @@ Makieta prostego launchera dla osoby starszej, działająca jako aplikacja webow
 - Wiadomości
 - Czytanie wiadomości
 - Połączenia
-- Połączenia z tym numerem
+- Ostatnie połączenia z tą osobą
 - Połączenie przychodzące
 - Rozmowa (aktywne połączenie)
 - Wideorozmowa (aktywne połączenie)
@@ -106,14 +110,15 @@ Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 - Tytuł „Połączenia" (bez cofania).
 - Lista: ikona kierunku, nazwa, opis i — w jednym rzędzie — czas trwania, np. „Odebrane · 5 min 23 s"; po prawej data i godzina.
 - Kodowanie potrójne: kolor, kształt strzałki, słowo (nieodebrane czerwone, odebrane zielone, wykonane niebieskie).
+- **Nieodebrana wideorozmowa** jest na liście oznaczona osobno („Nieodebrana wideorozmowa"), nie jako zwykłe „Nieodebrane".
 - **Nieobejrzane nieodebrane na górze**, pod nimi etykieta „Sprawdzone" (odebrane/wykonane oraz nieodebrane już obejrzane).
 - Czerwony przycisk **Powiadomienia** na dole.
 
-### Połączenia z tym numerem
+### Ostatnie połączenia z tą osobą
 - Historia połączeń z danym numerem, w stylu listy połączeń, z dokładnymi datami i czasem trwania.
 - Łączy świeże połączenia (z bieżącej sesji, w tym symulowane) z wcześniejszą historią; najnowsze na górze.
 - Dla numeru bez żadnych połączeń pokazuje „Brak wcześniejszych połączeń".
-- Dolny przycisk wraca do źródła: **Kontakty**, **Połączenia** albo **Wiadomość** (zależnie skąd otwarto).
+- Dolny przycisk wraca do źródła: **Kontakty**, **Połączenia**, **Wiadomość** albo **Powiadomienia** (zależnie skąd otwarto).
 
 ### Połączenie przychodzące
 - Nagłówek „Połączenie przychodzące" lub „Wideorozmowa przychodząca".
@@ -138,8 +143,7 @@ Okno nakładkowe na przyciemnionym tle, przed każdym połączeniem.
 
 ## Jak działa?
 
-### Funkcje (prawdziwe, działają same w sobie)
-Te funkcje działają realnie w makiecie (część efektu fizycznego — jak zapalenie diody latarki czy wyjście do systemu — leży poza możliwościami aplikacji webowej; wzmianki o tym w „Symulacje").
+Funkcje działają realnie w makiecie i nie wymagają niczego z zewnątrz (część efektu fizycznego — jak zapalenie diody latarki czy wyjście do systemu — leży poza możliwościami aplikacji webowej; wzmianki o tym w „Symulacje").
 
 - **Latarka** — przytrzymaj klawisz **0** na klawiaturze. Włącza/wyłącza; ikona latarki na klawiszu się podświetla.
 - **Wyciszenie / odciszenie** — przytrzymaj kafel **Wycisz** (napis zmienia się na „Odcisz"); blokuje wibracje i dźwięki.
@@ -148,6 +152,8 @@ Te funkcje działają realnie w makiecie (część efektu fizycznego — jak zap
 - **Odblokowanie** — **przeciągnij** ekran blokady w górę (kłódka jedzie za palcem); odpowiednik czytnika odcisku.
 - **Szybkie wybieranie ulubionych** — przytrzymaj klawisz **1, 2, 3…**, dzwoni kolejno do ulubionych z listy.
 - **Sekretne wrota do natywnego ekranu telefonu** — przytrzymaj strefę baterii (bzyk), a potem w kilka sekund strefę zasięgu (bzyk).
+- **Klawiatura tonowa w rozmowie** — w trakcie aktywnego połączenia zielony przycisk **Klaw.** (ze strzałką ▲/▼, po lewej od **Rozłącz**) wysuwa klawiaturę 0-9 oraz `*` `#`; wybierane cyfry pojawiają się na **wyświetlaczu w tym samym stylu co pole „Wpisz numer"** (jak wybieranie tonowe w menu IVR), a licznik czasu rozmowy leci dalej. Ponowne dotknięcie chowa klawiaturę; każde otwarcie/zakończenie rozmowy zaczyna od stanu schowanego i czyści wpisane cyfry.
+- **Sygnał „najpierw wpisz numer"** — naciśnięcie zielonego **Zadzwoń** przy **pustym** polu numeru miga polem „Wpisz numer" (krótka animacja) i bzyczy, zamiast nic nie robić. Miganie pojawia się **wyłącznie** przy tym świadomym kliknięciu — nie przy powrotach na ekran główny ani przy wpisaniu (osobny, dopracowany przypadek brzegowy, by powrót przyciskiem „Powiadomienia" nie wyzwalał fałszywego mignięcia).
 - **Zakończone rozmowy trafiają na listę „Połączenia"** — każda rozmowa dopisuje się do historii po zakończeniu: wychodząca jako „Wykonane" (z czasem trwania), odebrana przychodząca jako „Odebrane", a odrzucona przychodząca jako „Nieodebrane". Pojawiają się też w „Ostatnich połączeniach z tą osobą".
 
 ### Powiadomienia jako kolejka do przeglądania
@@ -157,7 +163,7 @@ Te funkcje działają realnie w makiecie (część efektu fizycznego — jak zap
 
 ### Grupowanie powiadomień po numerze
 - **Wiele zdarzeń z jednego numeru = jedno powiadomienie.** Jeśli ta sama osoba napisze kilka razy lub zadzwoni kilka razy, w panelu jest **jedna** karta (pokazuje najnowsze zdarzenie), nie kilka osobnych.
-- **Liczba na przycisku akcji** pokazuje, ilu zdarzeń dotyczy grupa (gdy więcej niż jedno): „CZYTAJ ③" = 3 nieprzeczytane wiadomości z tego numeru, „ODDZWOŃ ③" = 3 nieodebrane połączenia z tego numeru.
+- **Liczba na przycisku akcji** pokazuje, ilu zdarzeń dotyczy grupa (gdy więcej niż jedno): „CZYTAJ ③" = 3 nieprzeczytane wiadomości z tego numeru, „ODDZWOŃ ③" = 3 nieodebrane połączenia z tego numeru. Znacznik z liczbą ma białe tło i czytelny napis **w obu motywach** (w trybie ciemnym napis pozostaje czarny, żeby nie zlał się z białym tłem).
 - **Jedna reakcja załatwia całą grupę.** „CZYTAJ"/„Przeczytane" oznacza **wszystkie** wiadomości z danego numeru jako przeczytane i zdejmuje grupę. „ODDZWOŃ"/„Odrzuć" oznacza **wszystkie** nieodebrane z tego numeru jako sprawdzone. Tak samo przeczytanie z listy Wiadomości oznacza całą grupę z numeru.
 - **Licznik „+N więcej"** i **znaczniki na kaflach** liczą **osoby/numery**, nie pojedyncze sztuki (3 nieodebrane od Jana liczą się jako 1).
 - **Lista „Połączenia"** to historia — pokazuje pojedyncze zdarzenia osobno (jak w zwykłym telefonie); grupowanie dotyczy tylko panelu powiadomień i znaczników.
