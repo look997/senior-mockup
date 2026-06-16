@@ -980,6 +980,10 @@ html.dark .ctrl-btn,
 html.dark .incall-avatar,
 html.dark .neutral-btn,
 html.dark .notif-card { background: var(--surface); }
+/* Stan WŁĄCZONY przycisku rozmowy (np. Głośnik) — zielony także w trybie ciemnym.
+   Bez tego html.dark .ctrl-btn (wyżej) nadpisuje tło na --surface i zmiana
+   stanu jest niewidoczna. Specyficzność (0-3-0) przebija (0-2-0). */
+html.dark .ctrl-btn.on { background: #157A36; border-color: #0B3F1C; color: #FFF; }
 /* Ekrany połączeń/rozmowy/blokady */
 html.dark #screen-incall,
 html.dark #screen-incoming { background: var(--bg); }
