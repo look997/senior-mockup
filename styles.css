@@ -315,6 +315,9 @@ main {
   font-size: 26px; font-weight: 800;
   display: inline-flex; align-items: center; justify-content: center;
 }
+/* Tło badge jest zawsze białe — w dark theme --ink jest jasny, więc napis
+   byłby biały na białym. Wymuś czarny tekst niezależnie od motywu. */
+html.dark .act-badge { color: #1A1A1A; }
 /* Karta-podpowiedź dopasowania numeru do kontaktu. BEZ własnego gap — używa
    tego samego justify-content:space-between co karty msg/call, by elementy
    (awatar/nazwa/numer/przyciski) były na IDENTYCZNEJ wysokości. */
