@@ -609,11 +609,13 @@ let confirmContactName = null;   // znana osoba (do etykiety powrotu)
 let confirmHistName = null;      // nazwa LUB numer rozmówcy — do historii (też nieznany)
 let confirmHistPhone = null;     // numer rozmówcy — do historii (dopasowanie po numerze)
 let confirmOpenedFrom = 'home';  // z którego ekranu otwarto potwierdzenie
-function openConfirm(name, phone, callRef) {
+function openConfirm(name, phone, callRef, opts) {
   pendingCallRef = callRef || null;
   confirmContactName = null;
   confirmHistName = null; confirmHistPhone = null;
-  confirmOpenedFrom = currentScreenId();
+  // Źródło zwykle = bieżący ekran; opts.from nadpisuje (np. 'notif' — powiadomienie,
+  // które mieszka na HOME, ale powrót ma wracać "do Powiadomień").
+  confirmOpenedFrom = (opts && opts.from) || currentScreenId();
   if (name) {
     pendingCallName = name;
     const ph = phone || phoneOf(name);
@@ -728,13 +730,15 @@ const historyBackBtn = document.querySelector('#screen-contact-history .keyboard
 const historyBackLabel = document.getElementById('history-back-label');
 historyBtn.addEventListener('click', () => {
   if (!confirmHistName && !confirmHistPhone) return;
-  // Zapamiętaj skąd otwarto potwierdzenie (kontakty/połączenia/wiadomość), by wrócić tam.
-  historyBackTarget = (confirmOpenedFrom === 'calls') ? 'calls'
-                    : (confirmOpenedFrom === 'message') ? 'message'
-                    : 'contacts';
-  // Napis przycisku zależny od źródła.
-  const BACK_LABELS = { calls: 'Połączenia', message: 'Wiadomość', contacts: 'Kontakty' };
-  if (historyBackLabel) historyBackLabel.textContent = BACK_LABELS[historyBackTarget] || 'Kontakty';
+  // Zapamiętaj skąd otwarto potwierdzenie, by wrócić tam. Powiadomienia mieszkają
+  // na HOME — wracamy więc na ekran 'home', ale z etykietą "Powiadomienia".
+  // historyBackTarget = ID EKRANU dla showScreen; etykieta liczona osobno.
+  const SRC = (confirmOpenedFrom === 'calls' || confirmOpenedFrom === 'message'
+            || confirmOpenedFrom === 'notif') ? confirmOpenedFrom : 'contacts';
+  const BACK_SCREEN = { calls: 'calls', message: 'message', notif: 'home', contacts: 'contacts' };
+  const BACK_LABELS = { calls: 'Połączenia', message: 'Wiadomość', notif: 'Powiadomienia', contacts: 'Kontakty' };
+  historyBackTarget = BACK_SCREEN[SRC];
+  if (historyBackLabel) historyBackLabel.textContent = BACK_LABELS[SRC];
   overlay.classList.add('hidden');   // zamknij potwierdzenie bez oznaczania
   pendingCallRef = null;
   renderContactHistory(confirmHistName, confirmHistPhone);
@@ -1056,7 +1060,7 @@ function buildTopNotifCard() {
     card.querySelector('[data-act="callback"]').addEventListener('click', () => {
       c.handled = true; updateBadges(); renderCalls();
       notifQueue.pop(); renderNotifStack();
-      openConfirm(c.name, c.phone);
+      openConfirm(c.name, c.phone, null, { from: 'notif' });   // powrót: "Powiadomienia" (HOME)
     });
     card.querySelector('[data-act="reject"]').addEventListener('click', () => {
       c.handled = true; updateBadges(); renderCalls();
