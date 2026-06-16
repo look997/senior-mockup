@@ -598,6 +598,7 @@ function unlockScreen() {
 // ---------------- OVERLAY POTWIERDZENIA (z numerem telefonu) ----------------
 const overlay = document.getElementById('call-confirm');
 const confirmText = document.getElementById('confirm-text');
+const confirmAvatar = document.getElementById('confirm-avatar');
 let pendingCallName = null;
 let pendingCallRef = null;   // jeśli dzwonimy z karty nieodebranego — by oznaczyć obsłużone
 
@@ -627,6 +628,18 @@ function openConfirm(name, phone, callRef) {
   } else {
     pendingCallName = null;
     confirmText.textContent = 'Najpierw wpisz numer.';
+  }
+  // Awatar rozmówcy: znany kontakt → jego inicjały/kolor; nieznany numer → "?" na szaro;
+  // brak osoby (komunikat "wpisz numer") → ukryty.
+  if (confirmAvatar) {
+    if (name || phone) {
+      const a = confirmContactName ? avatarFor(confirmContactName) : { initials: '?', color: 'av-gray' };
+      confirmAvatar.className = 'avatar ' + a.color;
+      confirmAvatar.textContent = a.initials;
+      confirmAvatar.hidden = false;
+    } else {
+      confirmAvatar.hidden = true;
+    }
   }
   // Pokaż pozycję historii tylko dla znanego kontaktu.
   historyBtn.hidden = !confirmContactName;
@@ -685,10 +698,13 @@ const historyBackLabel = document.getElementById('history-back-label');
 historyBtn.addEventListener('click', () => {
   if (!confirmContactName) return;
   const name = confirmContactName;
-  // Zapamiętaj skąd otwarto potwierdzenie (kontakty/połączenia), by wrócić tam.
-  historyBackTarget = (confirmOpenedFrom === 'calls') ? 'calls' : 'contacts';
+  // Zapamiętaj skąd otwarto potwierdzenie (kontakty/połączenia/wiadomość), by wrócić tam.
+  historyBackTarget = (confirmOpenedFrom === 'calls') ? 'calls'
+                    : (confirmOpenedFrom === 'message') ? 'message'
+                    : 'contacts';
   // Napis przycisku zależny od źródła.
-  if (historyBackLabel) historyBackLabel.textContent = (historyBackTarget === 'calls') ? 'Połączenia' : 'Kontakty';
+  const BACK_LABELS = { calls: 'Połączenia', message: 'Wiadomość', contacts: 'Kontakty' };
+  if (historyBackLabel) historyBackLabel.textContent = BACK_LABELS[historyBackTarget] || 'Kontakty';
   overlay.classList.add('hidden');   // zamknij potwierdzenie bez oznaczania
   pendingCallRef = null;
   renderContactHistory(name);
@@ -722,6 +738,18 @@ function initialsFor(name) {
 function avatarColorFor(name) {
   const c = contacts.find((x) => x.name === name);
   return c ? c.color : 'av-blue';
+}
+// Awatar (inicjały + kolor) dla dowolnej nazwy/numeru — spójnie wszędzie:
+// znany kontakt → jego inicjały i kolor; numer spoza kontaktów → "?" na szaro.
+function avatarFor(name) {
+  const c = contacts.find((x) => x.name === name);
+  if (c) return { initials: c.initials, color: c.color };
+  return { initials: '?', color: 'av-gray' };
+}
+// Mały kawałek HTML awatara (do wstawiania w kartach).
+function avatarHTML(name, extraClass) {
+  const a = avatarFor(name);
+  return '<span class="avatar ' + a.color + (extraClass ? ' ' + extraClass : '') + '">' + a.initials + '</span>';
 }
 
 const incallPhone = document.getElementById('incall-phone');
@@ -802,9 +830,12 @@ document.querySelector('[data-role="to-audio"]').addEventListener('click', goAud
 
 // ---------------- RENDER: WIADOMOŚCI (grupy: nieprzeczytane | przeczytane) ----------------
 function msgCardHTML(m) {
-  return '<div class="msg-time">' + m.time + '</div>' +
-    '<div class="msg-sender">' + m.sender + '</div>' +
-    '<div class="msg-preview">' + (m.mms ? '<span class="msg-mms-tag">[MMS]</span>' : '') + m.preview + '</div>' +
+  return '<span class="avatar ' + (m.color || 'av-gray') + '">' + (m.initials || '?') + '</span>' +
+    '<div class="msg-body">' +
+      '<div class="msg-time">' + m.time + '</div>' +
+      '<div class="msg-sender">' + m.sender + '</div>' +
+      '<div class="msg-preview">' + (m.mms ? '<span class="msg-mms-tag">[MMS]</span>' : '') + m.preview + '</div>' +
+    '</div>' +
     (m.unread ? '<div class="card-corner"></div>' : '');
 }
 function renderInbox() {
@@ -961,7 +992,7 @@ function buildTopNotifCard() {
     card.innerHTML =
       '<div class="notif-head"><span class="notif-kind">Wiadomość</span>' +
         '<span class="notif-time">' + m.time + '</span>' + more + '</div>' +
-      '<div class="notif-from">' + m.sender + '</div>' +
+      '<div class="notif-from"><span class="avatar ' + (m.color || 'av-gray') + '">' + (m.initials || '?') + '</span>' + m.sender + '</div>' +
       '<div class="notif-preview">' + (m.mms ? '[MMS] ' : '') + m.preview + '</div>' +
       '<div class="notif-actions">' +
         '<button class="notif-green" data-act="read">CZYTAJ</button>' +
@@ -979,7 +1010,7 @@ function buildTopNotifCard() {
     const c = n.ref;
     card.innerHTML =
       '<div class="notif-head"><span class="notif-kind">Nieodebrane połączenie</span>' + more + '</div>' +
-      '<div class="notif-from">' + c.name + '</div>' +
+      '<div class="notif-from">' + avatarHTML(c.name) + c.name + '</div>' +
       '<div class="notif-preview">' + formatPhone(c.phone) + ' · ' + c.time + '</div>' +
       '<div class="notif-actions">' +
         '<button class="notif-green" data-act="callback">ODDZWOŃ</button>' +

@@ -75,21 +75,17 @@ decyzje projektowe:
 * brak tapety bo nie ma gdzie, nawet w widoku blokady ekranu 
 * brak awatara w liscie polaczen i liscie "ostatnie polaczenia z ta osoba" bo tam ikonki rodzaju polaczenia/braku polaczenia
 
----
+nie: moze wejscie do messenger/watsap/chrome - nie wiem jak, to zaawansowane i zakladajac ze i tak ogarnia potem co jak wiec rownie dobrze moze se wejsc wrotami i tam siedziec caly czas. przez wrota się da to co tam
 
-NIE:
+o no pieknie, jak wejde w wiadomosciach w w wiadomosc i wtedy w zadzwon to i w okienku potwierdzenia dzwonienia jak wejde ta sciezka przez wiadomosci do "Ostantio polaczenia z ta osoba" to  czerwony przycisk na dole jest do "kontakty" a powinno byc do "Czytanie wiadomości" bo stamtąd pochodzi.
 
-moze wejscie do messenger/watsap/chrome - nie wiem jak, to zaawansowane i zakladajac ze i tak ogarnia potem co jak wiec rownie dobrze moze se wejsc wrotami i tam siedziec caly czas
+do zrobienia faktycznie: awatary wszedzie (w powiadomieniu, w popupie potwierdzenia dzwonienia, w liscie wiadomosci)
 
 ---
 
 moze inspo dotychczasowymi aplikacjami zeby ulepszyc wyglad
 
-o no pieknie, jak wejde w wiadomosciach w w wiadomosc i wtedy w zadzwon to i w okienku potwierdzenia dzwonienia jak wejde ta sciezka przez wiadomosci do "Ostantio polaczenia z ta osoba" to  czerwony przycisk na dole jest do "kontakty" a powinno byc do "Czytanie wiadomości" bo stamtąd pochodzi.
+symulacja nie dodaje do listy polaczen glosowych/wideo/odrzuconych ale to nic w sumie. no ale zrob
 
- no ale to jest jedno a drugie:  jest "ostatnie polaczenia z ta osoba" o ile jakies sa, a powinno to byc widoczne wlasciwie zawsze, po prostu wyswietli puste. w kontaktach tak samo
+no ale to jest jedno a drugie:  jest "ostatnie polaczenia z ta osoba" o ile jakies sa, a powinno to byc widoczne wlasciwie zawsze, po prostu wyswietli puste. w kontaktach tak samo
 w symulowanym pojaczeniu jak  wywolam popup potwierdzenia polaczenia to tez nie ma "ostatnio poleczenia z ta osoba"
-
-do zrobienia faktycznie: awatary wszedzie (w powiadomieniu, w popupie potwierdzenia dzwonienia, w liscie wiadomosci)
-
-symulacja nie dodaje do listy polaczen glosowych/wideo/odrzuconych ale to nic w sumie
