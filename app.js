@@ -300,22 +300,102 @@ function stopRingtone() {
 }
 
 // ---------------- LONG-PRESS (przytrzymanie) ----------------
-// Wywołuje handler po przytrzymaniu; ustawia el.dataset.lp by zablokować klik.
+// Odpala handler po przytrzymaniu NA przycisku; ustawia el.dataset.lp by zablokować klik.
+// Anuluje się, gdy palec ZEJDZIE z przycisku (sprawdzamy granice w pointermove — dotyk
+// ma niejawne przechwycenie wskaźnika, więc ruch leci tu nawet poza el), gdy palec
+// wstanie albo gdy gest przejmie scroll. Bez kasowania przy mikroruchu w obrębie przycisku.
 function attachLongPress(el, handler, ms) {
-  let timer = null;
-  const start = () => { timer = setTimeout(() => { timer = null; el.dataset.lp = '1'; handler(); }, ms || 600); };
-  const cancel = () => { if (timer) { clearTimeout(timer); timer = null; } };
-  el.addEventListener('touchstart', start, { passive: true });
-  el.addEventListener('mousedown', start);
-  el.addEventListener('touchend', cancel);
-  el.addEventListener('touchmove', cancel);
-  el.addEventListener('mouseup', cancel);
-  el.addEventListener('mouseleave', cancel);
+  let timer = null, pid = null;
+  const cancel = () => { if (timer) { clearTimeout(timer); timer = null; } pid = null; };
+  const inside = (e) => {
+    const r = el.getBoundingClientRect();
+    return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+  };
+  el.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    pid = e.pointerId;
+    timer = setTimeout(() => { timer = null; el.dataset.lp = '1'; handler(); }, ms || 600);
+  });
+  el.addEventListener('pointermove', (e) => {
+    if (timer !== null && e.pointerId === pid && !inside(e)) cancel();   // palec zszedł z przycisku
+  });
+  el.addEventListener('pointerup', cancel);
+  el.addEventListener('pointercancel', cancel);
   // Po long-pressie zablokuj następujący klik (by nie odpalić nawigacji/akcji).
   el.addEventListener('click', (e) => {
     if (el.dataset.lp === '1') { e.stopImmediatePropagation(); e.preventDefault(); el.dataset.lp = '0'; }
   }, true);
 }
+
+// ---------------- TAP = wciśnij i puść na TYM SAMYM przycisku ----------------
+// Zero strefy tolerancji. Liczy się tylko: palec wstał i opadł na tym samym
+// elemencie akcji — droga między jest nieistotna (jak przyciski wszędzie, też
+// myszą). Zwykły `click` odpada, bo przeglądarka kasuje go przy ruchu „na wszelki
+// wypadek, może to scroll". pointercancel = scroll faktycznie przejął gest (w
+// listach) → wtedy to nie tap, tylko przewijanie.
+(function setupTap() {
+  const SEL = 'button, [data-target], .contact-card, .msg-card, .call-card';
+  const SCROLLERS = '.contacts-list, .messages-body, .calls-body, .message-body, .inbox-list, .calls-list';
+  const VERT_TOL = 16;   // px (wizualne) — zapas pionowego ruchu zanim uznamy gest za przewijanie;
+                         // większy niż natywny, by drżący palec mógł kliknąć mimo lekkiego góra/dół.
+  const act = (n) => (n && n.closest) ? n.closest(SEL) : null;
+  const scrollerOf = (n) => (n && n.closest) ? n.closest(SCROLLERS) : null;
+  let downEl = null, pid = null, synthAt = 0;
+  let scroller = null, startY = 0, lastY = 0, scl = 1, scrolling = false;
+  // Podświetlenie wciśnięcia: nasza klasa .is-pressed, NIE :active (przeglądarka zrzuca
+  // :active przy ruchu palca → przycisk „puszcza" wizualnie mimo że akcja idzie).
+  const press = (el, on) => { if (el) el.classList.toggle('is-pressed', on); };
+  const inside = (el, e) => {
+    const r = el.getBoundingClientRect();
+    return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+  };
+  const reset = () => { press(downEl, false); downEl = null; scroller = null; scrolling = false; };
+  document.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) { reset(); return; }
+    downEl = act(e.target); pid = e.pointerId;
+    startY = lastY = e.clientY; scrolling = false;
+    // Ręczne przewijanie listy TYLKO gdy lista faktycznie ma co przewijać.
+    const sc = scrollerOf(e.target);
+    scroller = (sc && sc.scrollHeight > sc.clientHeight + 1) ? sc : null;
+    if (scroller) { const r = sc.getBoundingClientRect(); scl = (r.height / sc.offsetHeight) || 1; }
+    press(downEl, true);
+  }, true);
+  document.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== pid) return;
+    // W liście: ruch w PIONIE ponad próg = przewijanie (działa też po wcześniejszym
+    // ruchu w bok — mierzymy od startu, bez blokady kierunku jak natywny pan-y).
+    if (scroller && !scrolling && Math.abs(e.clientY - startY) > VERT_TOL) {
+      scrolling = true; lastY = e.clientY;       // start przewijania bez skoku o próg
+      press(downEl, false); downEl = null;        // to gest przewijania, nie tap
+    }
+    if (scrolling) {
+      scroller.scrollTop -= (e.clientY - lastY) / scl;   // 1:1 z palcem (skala ramki)
+      lastY = e.clientY;
+    } else if (downEl) {
+      press(downEl, inside(downEl, e));            // świeci, póki palec na przycisku (ruch w bok OK)
+    }
+  }, true);
+  document.addEventListener('pointercancel', (e) => { if (e.pointerId === pid) reset(); }, true);
+  document.addEventListener('pointerup', (e) => {
+    const d = downEl, wasScrolling = scrolling;
+    reset();
+    if (wasScrolling || !d || e.pointerId !== pid) return;
+    if (act(document.elementFromPoint(e.clientX, e.clientY)) !== d) return;  // puszczono poza tym przyciskiem
+    synthAt = Date.now();
+    d.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window,
+      clientX: e.clientX, clientY: e.clientY }));
+  }, true);
+  // Anty-dubel: ubij natywny (trusted) click tuż po naszym syntetycznym.
+  document.addEventListener('click', (e) => {
+    if (e.isTrusted && Date.now() - synthAt < 500) { e.stopImmediatePropagation(); e.preventDefault(); }
+  }, true);
+})();
+
+// ---------------- POLITYKA "ZERO GESTÓW": ucięcie wbudowanych gestów-ucieczek ----------------
+// menu kontekstowe z długiego przytrzymania i natywne przeciąganie linków/obrazków.
+// (Zoom ubity w viewport: user-scalable=no — pinch i double-tap nieaktywne.)
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+document.addEventListener('dragstart', (e) => e.preventDefault());
 
 // ---------------- LATARKA (toggle wizualny; przytrzymaj #) ----------------
 let flashOn = false;
